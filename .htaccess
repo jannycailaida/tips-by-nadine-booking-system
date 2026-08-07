@@ -1,0 +1,22 @@
+# ============================================================
+# Tips by Nadine Booking System - Security Rules
+# Blocks direct web access to backend directories.
+# ============================================================
+
+# Prevent directory listing
+Options -Indexes
+
+# Block direct access to backend directories
+RewriteEngine On
+RewriteRule ^(?:config|controllers|includes|models|views)/ - [F,L]
+
+# Block common sensitive files
+<FilesMatch "\.(sql|log|md|json|ini)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
