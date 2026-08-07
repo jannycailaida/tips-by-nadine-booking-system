@@ -121,23 +121,36 @@
         </header>
 
         <div class="designs-grid">
-            <?php foreach ($featuredDesigns as $design): ?>
-                <article class="design-card">
-                    <div class="design-image">
-                        <?php if ($design['image_path']): ?>
-                            <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" loading="lazy">
-                        <?php else: ?>
-                            <img src="<?php echo base_url('assets/images/design-fallback.jpg'); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" class="design-fallback-img" loading="lazy">
-                        <?php endif; ?>
-                        <span class="design-category"><?php echo htmlspecialchars($design['category_name'] ?? 'Nail Art'); ?></span>
-                    </div>
-                    <div class="design-info">
-                        <h3 class="design-name"><?php echo htmlspecialchars($design['name']); ?></h3>
-                        <p class="design-price">₱<?php echo number_format($design['price'], 2); ?></p>
-                        <a href="<?php echo base_url('design.php?id=' . $design['id']); ?>" class="btn btn-sm btn-outline">View Details</a>
-                    </div>
-                </article>
-            <?php endforeach; ?>
+            <?php if (empty($featuredDesigns)): ?>
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <h3>No featured designs yet</h3>
+                    <p>Check back soon for our latest styles</p>
+                    <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-primary">Browse Gallery</a>
+                </div>
+            <?php else: ?>
+                <?php foreach ($featuredDesigns as $design): ?>
+                    <article class="design-card">
+                        <div class="design-image">
+                            <?php if ($design['image_path']): ?>
+                                <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" loading="lazy">
+                            <?php else: ?>
+                                <img src="<?php echo base_url('assets/images/design-fallback.jpg'); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" class="design-fallback-img" loading="lazy">
+                            <?php endif; ?>
+                            <span class="design-category"><?php echo htmlspecialchars($design['category_name'] ?? 'Nail Art'); ?></span>
+                        </div>
+                        <div class="design-info">
+                            <h3 class="design-name"><?php echo htmlspecialchars($design['name']); ?></h3>
+                            <p class="design-price">₱<?php echo number_format($design['price'], 2); ?></p>
+                            <a href="<?php echo base_url('design.php?id=' . $design['id']); ?>" class="btn btn-sm btn-outline">View Details</a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
 
         <div class="section-cta">
@@ -163,12 +176,23 @@
 
         <div class="services-grid">
             <?php foreach ($services as $service): ?>
+                <?php
+                    // Map service names to appropriate icons
+                    $iconSvg = match (true) {
+                        stripos($service['name'], 'Manicure') !== false && stripos($service['name'], 'Gel') !== false => '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/><circle cx="12" cy="12" r="3"/>',
+                        stripos($service['name'], 'Manicure') !== false => '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+                        stripos($service['name'], 'Acrylic') !== false && stripos($service['name'], 'Fill') !== false => '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+                        stripos($service['name'], 'Acrylic') !== false => '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/>',
+                        stripos($service['name'], 'Pedicure') !== false && stripos($service['name'], 'Gel') !== false => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 2v2"/><line x1="8" y1="21" x2="16" y2="21"/>',
+                        stripos($service['name'], 'Pedicure') !== false => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+                        stripos($service['name'], 'Nail Art') !== false => '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+                        default => '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'
+                    };
+                ?>
                 <article class="service-card">
                     <div class="service-icon" aria-hidden="true">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                            <path d="M2 17l10 5 10-5"/>
-                            <path d="M2 12l10 5 10-5"/>
+                            <?php echo $iconSvg; ?>
                         </svg>
                     </div>
                     <h3 class="service-name"><?php echo htmlspecialchars($service['name']); ?></h3>

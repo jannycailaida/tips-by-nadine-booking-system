@@ -197,10 +197,18 @@ class BookingController extends BaseController {
             $aiRecommendations = json_decode($booking['ai_recommendations'], true) ?? [];
         }
 
+        $statusLabels = [
+            'cancelled' => 'Appointment Cancelled',
+            'completed' => 'Appointment Completed',
+            'pending'   => 'Booking Received',
+            'confirmed' => 'Booking Confirmed',
+        ];
+        $label = $statusLabels[$booking['status']] ?? 'Booking Details';
+
         $this->view('booking/confirmation', [
             'booking' => $booking,
             'ai_recommendations' => $aiRecommendations,
-            'pageTitle' => 'Booking Confirmed - Tips by Nadine',
+            'pageTitle' => $label . ' - Tips by Nadine',
         ]);
     }
 
@@ -227,7 +235,11 @@ class BookingController extends BaseController {
         }
 
         if (!in_array($booking['status'], ['pending', 'confirmed'])) {
-            $this->json(['error' => 'Cannot cancel this booking'], 400);
+            $this->json(['error' => 'This booking can no longer be cancelled'], 400);
+        }
+
+        if ($booking['booking_date'] < date('Y-m-d')) {
+            $this->json(['error' => 'Past appointments cannot be cancelled online'], 400);
         }
 
         $bookingModel->updateStatus($bookingId, 'cancelled');

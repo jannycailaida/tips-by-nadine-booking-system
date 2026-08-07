@@ -67,17 +67,61 @@
         var menu = qs('#nav-menu');
         if (!toggle || !menu) return;
 
+        var lastFocus = null;
+
+        function openMenu() {
+            lastFocus = document.activeElement;
+            menu.classList.add('open');
+            menu.setAttribute('aria-modal', 'true');
+            toggle.setAttribute('aria-expanded', 'true');
+            var first = qs('.nav-mobile-link, .nav-mobile a', menu);
+            if (first) first.focus();
+        }
+
+        function closeMenu() {
+            menu.classList.remove('open');
+            menu.removeAttribute('aria-modal');
+            toggle.setAttribute('aria-expanded', 'false');
+            if (lastFocus) lastFocus.focus();
+        }
+
         toggle.addEventListener('click', function () {
-            var open = menu.classList.toggle('open');
-            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (menu.classList.contains('open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
         });
 
         // Close menu when a link is clicked
         qsa('.nav-mobile-link', menu).forEach(function (link) {
             link.addEventListener('click', function () {
-                menu.classList.remove('open');
-                toggle.setAttribute('aria-expanded', 'false');
+                closeMenu();
             });
+        });
+
+        // Escape closes the menu
+        menu.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeMenu();
+            }
+        });
+
+        // Keep Tab focus inside the open menu
+        menu.addEventListener('keydown', function (e) {
+            if (e.key !== 'Tab') return;
+            var focusable = qsa('a[href], button', menu);
+            if (!focusable.length) return;
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         });
     }
 
@@ -318,19 +362,101 @@
     }
 
     /* ============================================================
-       Cancel Booking Confirmation
+       Booking Filter Tabs
+       ============================================================ */
+    function initBookingFilter() {
+        var tabs = qsa('.filter-tab');
+        var cards = qsa('.booking-card');
+        if (!tabs.length || !cards.length) return;
+
+        function applyFilter(filter) {
+            var shown = 0;
+            cards.forEach(function (card) {
+                var state = card.getAttribute('data-state') || 'upcoming';
+                var match = filter === 'all' || state === filter;
+                card.hidden = !match;
+                if (match) shown++;
+            });
+            var emptyMsg = qs('.bookings-filter-empty');
+            if (emptyMsg) emptyMsg.hidden = shown > 0;
+        }
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                tabs.forEach(function (t) {
+                    var active = t === tab;
+                    t.classList.toggle('is-active', active);
+                    t.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                applyFilter(tab.getAttribute('data-filter'));
+            });
+        });
+
+        // Expose for the cancel flow so cards move between groups correctly
+        window.__applyBookingFilter = applyFilter;
+    }
+
+    /* ============================================================
+       Cancel Booking (inline warm confirmation)
        ============================================================ */
     function initCancelBooking() {
         qsa('.btn-cancel').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var bookingId = btn.getAttribute('data-booking-id');
-                if (!bookingId) return;
+                var card = btn.closest('.booking-card');
+                if (!card) return;
 
-                var confirmed = window.confirm('Are you sure you want to cancel this booking? This cannot be undone.');
-                if (!confirmed) return;
+                var panel = qs('.cancel-confirm', card);
+                if (!panel) return;
+
+                // Name the exact booking being cancelled
+                var target = qs('[data-confirm-target]', panel);
+                if (target && btn.getAttribute('data-when')) {
+                    var service = qs('.booking-service', card);
+                    var serviceName = service ? service.textContent : 'this appointment';
+                    target.textContent = serviceName + ' · ' + btn.getAttribute('data-when');
+                }
+
+                panel.hidden = false;
+                card.classList.add('cancelling');
+                var confirmBtn = qs('.confirm-cancel', panel);
+                if (confirmBtn) confirmBtn.focus();
+            });
+        });
+
+        // "Keep Booking" closes the panel
+        qsa('.cancel-keep').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var card = btn.closest('.booking-card');
+                if (!card) return;
+                var panel = qs('.cancel-confirm', card);
+                if (panel) panel.hidden = true;
+                card.classList.remove('cancelling');
+                var cancelBtn = qs('.btn-cancel', card);
+                if (cancelBtn) cancelBtn.focus();
+            });
+        });
+
+        // Escape closes the open panel
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            qsa('.booking-card.cancelling').forEach(function (card) {
+                var panel = qs('.cancel-confirm', card);
+                if (panel) panel.hidden = true;
+                card.classList.remove('cancelling');
+                var cancelBtn = qs('.btn-cancel', card);
+                if (cancelBtn) cancelBtn.focus();
+            });
+        });
+
+        // "Yes, Cancel" submits
+        qsa('.confirm-cancel').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var bookingId = btn.getAttribute('data-booking-id');
+                var card = btn.closest('.booking-card');
+                if (!bookingId || !card) return;
 
                 btn.disabled = true;
-                btn.textContent = 'Cancelling...';
+                btn.textContent = 'Cancelling…';
 
                 var body = new URLSearchParams();
                 body.append('booking_id', bookingId);
@@ -342,26 +468,50 @@
                     credentials: 'same-origin'
                 })
                     .then(function (response) {
-                        if (!response.ok) throw new Error('Request failed');
-                        return response.json();
+                        // Parse the body even on HTTP errors so the real message survives
+                        return response.json().then(function (data) {
+                            if (!response.ok) throw new Error(data.error || 'Could not cancel this booking.');
+                            return data;
+                        });
                     })
                     .then(function (data) {
-                        if (data.success) {
-                            showToast('Booking cancelled.', 'success');
-                            setTimeout(function () {
-                                window.location.reload();
-                            }, 800);
-                        } else {
-                            throw new Error(data.error || 'Could not cancel booking.');
+                        if (!data.success) throw new Error(data.error || 'Could not cancel this booking.');
+                        showToast('Your appointment is cancelled. We hope to see you again soon.', 'success');
+                        markCardCancelled(card);
+                        if (typeof window.__applyBookingFilter === 'function') {
+                            window.__applyBookingFilter(qs('.filter-tab.is-active').getAttribute('data-filter'));
                         }
                     })
                     .catch(function (err) {
                         btn.disabled = false;
-                        btn.textContent = 'Cancel';
-                        showToast(err.message || 'Could not cancel booking.', 'error');
+                        btn.textContent = 'Yes, Cancel';
+                        showToast(err.message || 'Could not cancel this booking.', 'error');
                     });
             });
         });
+    }
+
+    function markCardCancelled(card) {
+        if (!card) return;
+
+        // Status pill → Cancelled
+        var pill = qs('.booking-status', card);
+        if (pill) {
+            pill.className = 'booking-status status-cancelled';
+            pill.textContent = 'Cancelled';
+        }
+
+        // Remove cancel affordances, keep Details
+        var panel = qs('.cancel-confirm', card);
+        if (panel) panel.remove();
+        var cancelBtn = qs('.btn-cancel', card);
+        if (cancelBtn) cancelBtn.remove();
+
+        // Move card to the cancelled group
+        card.setAttribute('data-state', 'cancelled');
+        card.removeAttribute('data-cancelled');
+        card.classList.remove('cancelling');
+        card.classList.add('is-cancelled');
     }
 
     /* ============================================================
@@ -372,6 +522,7 @@
         initBookingSteps();
         initTimeSlots();
         initUploadArea();
+        initBookingFilter();
         initCancelBooking();
     });
 })();

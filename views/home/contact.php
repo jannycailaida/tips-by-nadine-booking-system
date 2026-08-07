@@ -84,16 +84,16 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name" class="form-label">Your Name</label>
-                            <input type="text" name="name" id="name" class="form-input" required value="<?php echo htmlspecialchars($old['name'] ?? ''); ?>">
+                            <input type="text" name="name" id="name" class="form-input" required autocomplete="name" value="<?php echo htmlspecialchars($old['name'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
                             <label for="email" class="form-label">Your Email</label>
-                            <input type="email" name="email" id="email" class="form-input" required value="<?php echo htmlspecialchars($old['email'] ?? ''); ?>">
+                            <input type="email" name="email" id="email" class="form-input" required autocomplete="email" value="<?php echo htmlspecialchars($old['email'] ?? ''); ?>">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="subject" class="form-label">Subject</label>
-                        <input type="text" name="subject" id="subject" class="form-input" required value="<?php echo htmlspecialchars($old['subject'] ?? ''); ?>">
+                        <input type="text" name="subject" id="subject" class="form-input" required autocomplete="off" value="<?php echo htmlspecialchars($old['subject'] ?? ''); ?>">
                     </div>
                     <div class="form-group">
                         <label for="message" class="form-label">Message</label>

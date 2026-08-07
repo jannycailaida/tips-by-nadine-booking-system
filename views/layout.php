@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="<?php echo base_url('css/components.css'); ?>">
 </head>
 <body data-base-url="<?php echo base_url(); ?>">
+    <!-- Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <!-- Navigation -->
     <nav class="nav" role="navigation" aria-label="Main navigation">
         <div class="container nav-container">
@@ -113,10 +116,10 @@
                 <div class="footer-links">
                     <h4>Services</h4>
                     <ul>
-                        <li><a href="#">Manicure</a></li>
-                        <li><a href="#">Pedicure</a></li>
-                        <li><a href="#">Gel & Acrylic</a></li>
-                        <li><a href="#">Nail Art</a></li>
+                        <li><a href="<?php echo base_url('gallery.php'); ?>">Manicure</a></li>
+                        <li><a href="<?php echo base_url('gallery.php'); ?>">Pedicure</a></li>
+                        <li><a href="<?php echo base_url('gallery.php'); ?>">Gel & Acrylic</a></li>
+                        <li><a href="<?php echo base_url('gallery.php'); ?>">Nail Art</a></li>
                     </ul>
                 </div>
 

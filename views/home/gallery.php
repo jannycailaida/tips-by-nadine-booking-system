@@ -13,7 +13,7 @@
             <form method="GET" class="filter-form">
                 <div class="filter-group">
                     <label for="category" class="visually-hidden">Filter by Category</label>
-                    <select name="category" id="category" class="select" onchange="this.form.submit()">
+                    <select name="category" id="category" class="select">
                         <option value="">All Categories</option>
                         <?php foreach ($categories as $category): ?>
                             <option value="<?php echo $category['id']; ?>" <?php echo $selectedCategory == $category['id'] ? 'selected' : ''; ?>>
@@ -26,7 +26,7 @@
                 <div class="filter-group">
                     <label for="search" class="visually-hidden">Search Designs</label>
                     <input type="search" name="search" id="search" class="input" placeholder="Search designs..." value="<?php echo htmlspecialchars($searchTerm); ?>">
-                    <button type="submit" class="btn btn-secondary">Search</button>
+                    <button type="submit" class="btn btn-secondary">Apply</button>
                 </div>
             </form>
         </div>

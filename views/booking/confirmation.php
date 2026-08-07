@@ -1,22 +1,47 @@
 <!-- Booking Confirmation Page -->
+<?php
+    $status = $booking['status'] ?? 'confirmed';
+    $statusMeta = [
+        'cancelled' => ['title' => 'Appointment Cancelled', 'sub' => 'This booking is no longer active', 'label' => 'Cancelled'],
+        'completed' => ['title' => 'Appointment Completed', 'sub' => 'Thanks for letting us pamper you', 'label' => 'Completed'],
+        'confirmed' => ['title' => 'Booking Confirmed!', 'sub' => 'Your appointment has been scheduled', 'label' => 'Confirmed'],
+        'pending'   => ['title' => 'Booking Received', 'sub' => 'We\'re confirming your appointment', 'label' => 'Pending'],
+    ];
+    $meta = $statusMeta[$status] ?? $statusMeta['confirmed'];
+?>
+
 <section class="page-header auth-header">
     <div class="container">
-        <h1 class="page-title">Booking Confirmed!</h1>
-        <p class="page-subtitle">Your appointment has been scheduled</p>
+        <h1 class="page-title"><?php echo $meta['title']; ?></h1>
+        <p class="page-subtitle"><?php echo $meta['sub']; ?></p>
     </div>
 </section>
 
 <section class="confirmation-section">
     <div class="container">
-        <div class="confirmation-card">
-            <div class="confirmation-icon" aria-hidden="true">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
+        <div class="confirmation-card status-<?php echo $status; ?>">
+            <div class="confirmation-icon <?php echo $status === 'cancelled' ? 'icon-muted' : ''; ?>" aria-hidden="true">
+                <?php if ($status === 'cancelled'): ?>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                <?php else: ?>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                <?php endif; ?>
             </div>
-            <h2>Appointment Confirmed</h2>
-            <p class="confirmation-message">We've sent a confirmation email to <strong><?php echo htmlspecialchars($booking['email']); ?></strong></p>
+            <h2><?php echo $meta['title']; ?></h2>
+            <?php if ($status === 'cancelled'): ?>
+                <p class="confirmation-message">This appointment for <strong><?php echo htmlspecialchars($booking['service_name']); ?></strong> has been cancelled. We hope to see you again soon.</p>
+            <?php elseif ($status === 'pending'): ?>
+                <p class="confirmation-message">We've received your booking request and will confirm your slot shortly.</p>
+            <?php else: ?>
+                <p class="confirmation-message"><?php echo $status === 'completed' ? 'We hope you loved your visit.' : "We've sent a confirmation email to <strong>" . htmlspecialchars($booking['email']) . "</strong>."; ?></p>
+            <?php endif; ?>
 
             <div class="booking-summary">
                 <h3>Booking Details</h3>
@@ -73,12 +98,18 @@
 
             <div class="confirmation-actions">
                 <a href="<?php echo base_url('dashboard.php'); ?>" class="btn btn-primary">View My Bookings</a>
-                <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-secondary">Browse More Designs</a>
+                <?php if ($status === 'cancelled'): ?>
+                    <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-secondary">Book a New Appointment</a>
+                <?php else: ?>
+                    <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-secondary">Browse More Designs</a>
+                <?php endif; ?>
             </div>
 
-            <p class="confirmation-note">
-                <strong>Need to make changes?</strong> You can reschedule or cancel up to 24 hours before your appointment from your dashboard.
-            </p>
+            <?php if (in_array($status, ['confirmed', 'pending'])): ?>
+                <p class="confirmation-note">
+                    <strong>Need to make changes?</strong> You can cancel up to 24 hours before your appointment from your dashboard.
+                </p>
+            <?php endif; ?>
         </div>
     </div>
 </section>
