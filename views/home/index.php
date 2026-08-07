@@ -1,24 +1,12 @@
 <!-- Hero Section -->
 <section class="hero" aria-labelledby="hero-title">
     <div class="container">
-        <div class="hero-content">
-            <h1 id="hero-title" class="hero-title">Beautiful Nails, <span class="hero-accent">Effortlessly Booked</span></h1>
-            <p class="hero-subtitle">Discover stunning nail designs, book appointments online, and get AI-powered design recommendations tailored to your style.</p>
-            <div class="hero-actions">
-                <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-primary btn-lg">Book Appointment</a>
-                <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-secondary btn-lg">Browse Designs</a>
-            </div>
-        </div>
-        <div class="hero-visual" aria-hidden="true">
-            <div class="hero-card">
-                <div class="hero-card-inner">
-                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" aria-hidden="true">
-                        <circle cx="60" cy="60" r="50" stroke="#d4a574" stroke-width="3" stroke-dasharray="314" stroke-dashoffset="314" class="hero-ring"/>
-                        <path d="M60 30C43.4315 30 30 43.4315 30 60C30 76.5685 43.4315 90 60 90C76.5685 90 90 76.5685 90 60C90 43.4315 76.5685 30 60 30Z" stroke="#d4a574" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
-                        <path d="M60 40V60L75 70" stroke="#d4a574" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-            </div>
+        <span class="hero-eyebrow">Tips by Nadine · Nail Studio</span>
+        <h1 id="hero-title" class="hero-title">Serenity In Every <span class="hero-accent">Polish Stroke</span></h1>
+        <p class="hero-subtitle">Embark on a journey of tranquility and style with our rejuvenating nail services — and book your appointment in moments, right from home.</p>
+        <div class="hero-actions">
+            <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-primary btn-lg">Reserve Now</a>
+            <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-light btn-lg">Browse Designs</a>
         </div>
     </div>
 </section>
@@ -27,8 +15,9 @@
 <section class="features" aria-labelledby="features-title">
     <div class="container">
         <header class="section-header">
-            <h2 id="features-title" class="section-title">Why Choose Tips by Nadine</h2>
-            <p class="section-subtitle">Modern nail care meets smart technology</p>
+            <span class="section-eyebrow">Why Choose Us</span>
+            <h2 id="features-title" class="section-title">The Tips by Nadine Experience</h2>
+            <p class="section-subtitle">Modern nail care meets smart, relaxing technology</p>
         </header>
 
         <div class="features-grid">
@@ -83,10 +72,50 @@
     </div>
 </section>
 
+<!-- Heritage / Story Split Section -->
+<section class="split-section alt" aria-labelledby="heritage-title">
+    <div class="container">
+        <div class="split-grid">
+            <div class="split-media">
+                <div class="arch-frame">
+                    <img src="<?php echo base_url('assets/images/heritage.jpg'); ?>" alt="Freshly manicured nails in a serene salon setting" loading="lazy">
+                </div>
+            </div>
+            <div class="split-content">
+                <span class="split-eyebrow">Our Story</span>
+                <h2 id="heritage-title" class="split-title">Crafted With Care, In The Heart Of The City</h2>
+                <p class="split-text">From classic manicures to bespoke nail art, every visit to Tips by Nadine is designed to unwind and inspire. Our studio pairs skilled artistry with a serene, tropical atmosphere — so you leave feeling polished, relaxed, and beautifully you.</p>
+                <div class="split-stats">
+                    <div>
+                        <div class="split-stat-value">10+</div>
+                        <div class="split-stat-label">Years of Artistry</div>
+                    </div>
+                    <div>
+                        <div class="split-stat-value">5k+</div>
+                        <div class="split-stat-label">Happy Clients</div>
+                    </div>
+                    <div>
+                        <div class="split-stat-value">500+</div>
+                        <div class="split-stat-label">Signature Designs</div>
+                    </div>
+                </div>
+                <a href="<?php echo base_url('about.php'); ?>" class="text-cta">
+                    Learn About Tips by Nadine
+                    <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Featured Designs -->
 <section class="featured-designs" aria-labelledby="featured-title">
     <div class="container">
         <header class="section-header">
+            <span class="section-eyebrow">Gallery</span>
             <h2 id="featured-title" class="section-title">Featured Designs</h2>
             <p class="section-subtitle">Popular styles our clients love</p>
         </header>
@@ -98,13 +127,7 @@
                         <?php if ($design['image_path']): ?>
                             <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" loading="lazy">
                         <?php else: ?>
-                            <div class="design-placeholder" aria-hidden="true">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    <polyline points="21 15 16 10 5 21"/>
-                                </svg>
-                            </div>
+                            <img src="<?php echo base_url('assets/images/design-fallback.jpg'); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" class="design-fallback-img" loading="lazy">
                         <?php endif; ?>
                         <span class="design-category"><?php echo htmlspecialchars($design['category_name'] ?? 'Nail Art'); ?></span>
                     </div>
@@ -118,7 +141,13 @@
         </div>
 
         <div class="section-cta">
-            <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-secondary">View All Designs</a>
+            <a href="<?php echo base_url('gallery.php'); ?>" class="text-cta">
+                Browse The Full Gallery
+                <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
         </div>
     </div>
 </section>
@@ -127,7 +156,8 @@
 <section class="services-preview" aria-labelledby="services-title">
     <div class="container">
         <header class="section-header">
-            <h2 id="services-title" class="section-title">Our Services</h2>
+            <span class="section-eyebrow">Our Menu</span>
+            <h2 id="services-title" class="section-title">Enjoy Our Services</h2>
             <p class="section-subtitle">Professional nail care tailored to you</p>
         </header>
 
@@ -155,9 +185,10 @@
 <section class="cta-section" aria-labelledby="cta-title">
     <div class="container">
         <div class="cta-content">
-            <h2 id="cta-title" class="cta-title">Ready for Your Perfect Nails?</h2>
-            <p class="cta-subtitle">Book your appointment today and experience the Tips by Nadine difference.</p>
-            <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-primary btn-lg">Book Now</a>
+            <span class="cta-eyebrow">Reserve Your Seat</span>
+            <h2 id="cta-title" class="cta-title">Nail Your Perfect Appointment</h2>
+            <p class="cta-subtitle">Book your seat today and experience the Tips by Nadine difference.</p>
+            <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-primary btn-lg">Reserve Now</a>
         </div>
     </div>
 </section>

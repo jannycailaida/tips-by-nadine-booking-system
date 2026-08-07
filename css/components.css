@@ -5,7 +5,7 @@
 
 /* ---- Nav Logo ---- */
 .nav-logo {
-    color: var(--color-primary);
+    color: var(--color-accent);
     flex-shrink: 0;
 }
 
@@ -82,7 +82,7 @@
 .modal-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(43, 36, 41, 0.5);
+    background: rgba(21, 38, 19, 0.55);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
 }
@@ -198,7 +198,7 @@
 }
 
 .admin-table tbody tr:hover {
-    background: rgba(107, 58, 90, 0.04);
+    background: rgba(31, 53, 28, 0.05);
 }
 
 .table-thumb {

@@ -52,13 +52,7 @@
                     <label class="design-option no-design">
                         <input type="radio" name="design_id" value="" <?php echo (!isset($old['design_id']) || empty($old['design_id'])) ? 'checked' : ''; ?>>
                         <div class="design-option-content">
-                            <div class="design-option-placeholder" aria-hidden="true">
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <line x1="15" y1="9" x2="9" y2="15"/>
-                                    <line x1="9" y1="9" x2="15" y2="15"/>
-                                </svg>
-                            </div>
+                            <img src="<?php echo base_url('assets/images/no-design.jpg'); ?>" alt="" class="design-option-img" loading="lazy">
                             <h4>No Specific Design</h4>
                             <p>I'll decide at the salon</p>
                         </div>
@@ -71,12 +65,7 @@
                                 <?php if ($design['image_path']): ?>
                                     <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="" loading="lazy">
                                 <?php else: ?>
-                                    <div class="design-option-placeholder" aria-hidden="true">
-                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                                        </svg>
-                                    </div>
+                                    <img src="<?php echo base_url('assets/images/design-fallback.jpg'); ?>" alt="" class="design-option-img" loading="lazy">
                                 <?php endif; ?>
                                 <div>
                                     <h4><?php echo htmlspecialchars($design['name']); ?></h4>

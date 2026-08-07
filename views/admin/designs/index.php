@@ -88,12 +88,7 @@
                             <?php if ($design['image_path']): ?>
                                 <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="" class="table-thumb">
                             <?php else: ?>
-                                <div class="table-thumb placeholder" aria-hidden="true">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    </svg>
-                                </div>
+                                <img src="<?php echo base_url('assets/images/design-fallback.jpg'); ?>" alt="" class="table-thumb">
                             <?php endif; ?>
                         </td>
                         <td>

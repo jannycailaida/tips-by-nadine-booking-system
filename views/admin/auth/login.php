@@ -7,7 +7,7 @@
     <title><?php echo $pageTitle ?? 'Admin - Tips by Nadine'; ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo base_url('css/app.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('css/components.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('css/admin.css'); ?>">

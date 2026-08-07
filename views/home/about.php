@@ -14,14 +14,8 @@
                 <p>Tips by Nadine began with a simple passion for nail artistry and a commitment to providing exceptional nail care. What started as a small salon has grown into a beloved destination for nail lovers seeking quality service and creative designs.</p>
                 <p>We believe that beautiful nails are more than just an accessory - they're a form of self-expression. Our team of skilled professionals combines technical expertise with artistic creativity to deliver results that exceed expectations.</p>
             </div>
-            <div class="about-image" aria-hidden="true">
-                <div class="about-image-placeholder">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                </div>
+            <div class="about-image">
+                <img src="<?php echo base_url('assets/images/about.jpg'); ?>" alt="The serene interior of the Tips by Nadine nail studio" loading="lazy">
             </div>
         </div>
     </div>

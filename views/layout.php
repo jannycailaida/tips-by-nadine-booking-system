@@ -7,7 +7,7 @@
     <meta name="description" content="Tips by Nadine - Professional Nail Salon Booking System">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo base_url('css/app.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('css/components.css'); ?>">
 </head>
@@ -97,7 +97,7 @@
                         </svg>
                         <span>Tips by Nadine</span>
                     </a>
-                    <p class="footer-tagline">Professional nail care & artistic designs</p>
+                    <p class="footer-tagline">Serenity in every stroke. Professional nail care and artistic designs, crafted for your relaxation.</p>
                 </div>
 
                 <div class="footer-links">
@@ -121,12 +121,17 @@
                 </div>
 
                 <div class="footer-contact">
-                    <h4>Contact</h4>
+                    <h4>Visit Us</h4>
                     <address>
                         <p>123 Beauty Street</p>
                         <p>Manila, Philippines</p>
                         <p><a href="tel:+6321234567">+63 2 123 4567</a></p>
                         <p><a href="mailto:info@tipsbynadine.com">info@tipsbynadine.com</a></p>
+                    </address>
+                    <h4 style="margin-top: var(--spacing-lg);">Hours</h4>
+                    <address>
+                        <p>Mon – Sat · 9:00 AM – 7:00 PM</p>
+                        <p>Sunday · 10:00 AM – 5:00 PM</p>
                     </address>
                 </div>
             </div>
