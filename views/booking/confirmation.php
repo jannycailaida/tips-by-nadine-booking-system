@@ -8,6 +8,7 @@
         'pending'   => ['title' => 'Booking Received', 'sub' => 'We\'re confirming your appointment', 'label' => 'Pending'],
     ];
     $meta = $statusMeta[$status] ?? $statusMeta['confirmed'];
+    $canRebook = $status !== 'cancelled' && ($status === 'completed' || ($booking['booking_date'] ?? '') < date('Y-m-d'));
 ?>
 
 <section class="page-header auth-header">
@@ -137,6 +138,9 @@
                 <a href="<?php echo base_url('dashboard.php'); ?>" class="btn btn-primary">View My Bookings</a>
                 <?php if ($status === 'cancelled'): ?>
                     <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-secondary">Book a New Appointment</a>
+                <?php elseif ($canRebook): ?>
+                    <a href="<?php echo base_url('booking.php?rebook=' . $booking['id']); ?>" class="btn btn-secondary">Book Again</a>
+                    <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-ghost">Browse More Designs</a>
                 <?php else: ?>
                     <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-secondary">Browse More Designs</a>
                 <?php endif; ?>
@@ -154,6 +158,13 @@
                         Love seeing yourself styled? Tag <strong>#TipsByNadine</strong> and we'll feature your nails —
                         and a friend deserves the same glow. Bring someone along next time; two chairs, double the relaxing.
                     </p>
+                    <?php if (!empty($referralLink)): ?>
+                        <div class="referral-mini">
+                            <span>Your referral link</span>
+                            <input type="text" class="form-input referral-link-input" value="<?php echo htmlspecialchars($referralLink); ?>" readonly aria-label="Your referral link">
+                            <a href="mailto:?subject=Book%20with%20Tips%20by%20Nadine&body=<?php echo rawurlencode('Book your nail appointment with Tips by Nadine: ' . $referralLink); ?>" class="btn btn-sm btn-secondary">Share</a>
+                        </div>
+                    <?php endif; ?>
                     <?php if (!empty(array_filter($social))): ?>
                         <div class="confirmation-social" aria-label="Follow Tips by Nadine">
                             <?php if (!empty($social['instagram'])): ?>

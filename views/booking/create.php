@@ -18,7 +18,25 @@
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($rebookBooking)): ?>
+            <div class="rebook-banner">
+                <div>
+                    <p class="eyebrow">Book again</p>
+                    <h2>Rebooking <?php echo htmlspecialchars($rebookBooking['service_name']); ?></h2>
+                    <p>
+                        We preselected your previous service<?php echo !empty($rebookBooking['design_name']) ? ' and ' . htmlspecialchars($rebookBooking['design_name']) . ' design' : ''; ?>.
+                        Choose a fresh date and time that works for you.
+                    </p>
+                </div>
+                <span class="rebook-reference">From #<?php echo (int)$rebookBooking['id']; ?> · <?php echo date('M j, Y', strtotime($rebookBooking['booking_date'])); ?></span>
+            </div>
+        <?php endif; ?>
+
         <form method="POST" class="booking-form" enctype="multipart/form-data" id="booking-form">
+            <?php if (!empty($old['rebook_booking_id'])): ?>
+                <input type="hidden" name="rebook_booking_id" value="<?php echo (int)$old['rebook_booking_id']; ?>">
+            <?php endif; ?>
+
             <!-- Step 1: Service Selection -->
             <fieldset class="booking-step" data-step="1">
                 <legend class="step-title">

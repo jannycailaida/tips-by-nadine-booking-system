@@ -1,8 +1,32 @@
-<!-- Admin Analytics (Funnel) -->
+<?php
+$growth = array_merge([
+    'review_requested' => 0,
+    'review_opened' => 0,
+    'review_submitted' => 0,
+    'email_queued' => 0,
+    'email_sent' => 0,
+    'email_failed' => 0,
+    'referral_converted' => 0,
+    'rebook_started' => 0,
+    'rebook_completed' => 0,
+    'review_completion_rate' => 0,
+    'email_success_rate' => 0,
+], $growth ?? []);
+$reviewRequests = array_merge(['pending' => 0, 'opened' => 0, 'submitted' => 0, 'expired' => 0, 'total' => 0], $reviewRequests ?? []);
+$emailQueue = array_merge(['pending' => 0, 'processing' => 0, 'sent' => 0, 'failed' => 0, 'cancelled' => 0, 'total' => 0], $emailQueue ?? []);
+$referrals = array_merge(['registered' => 0, 'converted' => 0, 'credited' => 0, 'total' => 0], $referrals ?? []);
+$credits = array_merge(['pending' => 0, 'approved' => 0, 'redeemed' => 0, 'void' => 0, 'total' => 0], $credits ?? []);
+$recentReviewRequests = $recentReviewRequests ?? [];
+$recentEmails = $recentEmails ?? [];
+$recentReferrals = $recentReferrals ?? [];
+$recentCredits = $recentCredits ?? [];
+?>
+
+<!-- Admin Analytics (Funnel + Tier 3 Growth) -->
 <div class="admin-page-header">
     <h1 class="admin-page-title">Analytics</h1>
     <p class="admin-page-subtitle">
-        The booking funnel in numbers — from first visit to confirmed seat. Every figure below is real event data, no estimates.
+        The booking funnel and Tier 3 growth loop in numbers — reviews, queued emails, referrals, and rebookings from real event data.
     </p>
 </div>
 
@@ -118,6 +142,225 @@
                     </li>
                 <?php endforeach; ?>
             </ul>
+        </div>
+    </section>
+</div>
+
+<section class="admin-section">
+    <div class="section-header">
+        <h2 class="section-title">Tier 3 Growth Loop</h2>
+    </div>
+    <div class="stats-grid growth-stats-grid">
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo (int)$growth['review_requested']; ?></span>
+                <span class="stat-label">Review Requests</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo (int)$growth['review_submitted']; ?></span>
+                <span class="stat-label">Reviews Submitted</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo $growth['review_completion_rate']; ?>%</span>
+                <span class="stat-label">Review Completion</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo (int)$growth['email_queued']; ?></span>
+                <span class="stat-label">Emails Queued</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo $growth['email_success_rate']; ?>%</span>
+                <span class="stat-label">Email Success</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo (int)$growth['referral_converted']; ?></span>
+                <span class="stat-label">Referral Conversions</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo (int)$growth['rebook_started']; ?></span>
+                <span class="stat-label">Rebooks Started</span>
+            </div>
+        </article>
+        <article class="stat-card growth-stat-card">
+            <div class="stat-content">
+                <span class="stat-value"><?php echo (int)$growth['rebook_completed']; ?></span>
+                <span class="stat-label">Rebooks Completed</span>
+            </div>
+        </article>
+    </div>
+</section>
+
+<div class="admin-detail-grid growth-detail-grid">
+    <section class="admin-section detail-main">
+        <div class="section-header">
+            <h2 class="section-title">Review Request Pipeline</h2>
+        </div>
+        <div class="detail-card">
+            <dl class="detail-list growth-metric-list">
+                <div class="detail-item"><dt>Total</dt><dd><?php echo (int)$reviewRequests['total']; ?></dd></div>
+                <div class="detail-item"><dt>Pending</dt><dd><?php echo (int)$reviewRequests['pending']; ?></dd></div>
+                <div class="detail-item"><dt>Opened</dt><dd><?php echo (int)$reviewRequests['opened']; ?></dd></div>
+                <div class="detail-item"><dt>Submitted</dt><dd><?php echo (int)$reviewRequests['submitted']; ?></dd></div>
+                <div class="detail-item"><dt>Expired</dt><dd><?php echo (int)$reviewRequests['expired']; ?></dd></div>
+            </dl>
+            <p class="funnel-hint">Completing a booking from the admin panel creates one tokenized request and queues one review email.</p>
+        </div>
+    </section>
+
+    <section class="admin-section detail-sidebar">
+        <div class="section-header">
+            <h2 class="section-title">Email Queue Health</h2>
+        </div>
+        <div class="detail-card">
+            <dl class="detail-list growth-metric-list">
+                <div class="detail-item"><dt>Total</dt><dd><?php echo (int)$emailQueue['total']; ?></dd></div>
+                <div class="detail-item"><dt>Pending</dt><dd><?php echo (int)$emailQueue['pending']; ?></dd></div>
+                <div class="detail-item"><dt>Processing</dt><dd><?php echo (int)$emailQueue['processing']; ?></dd></div>
+                <div class="detail-item"><dt>Sent</dt><dd><?php echo (int)$emailQueue['sent']; ?></dd></div>
+                <div class="detail-item"><dt>Failed</dt><dd><?php echo (int)$emailQueue['failed']; ?></dd></div>
+            </dl>
+            <p class="funnel-hint">The queue stores review and referral follow-ups. Sending remains controlled by the queue runner.</p>
+        </div>
+    </section>
+</div>
+
+<section class="admin-section">
+    <div class="section-header">
+        <h2 class="section-title">Recent Review Requests</h2>
+    </div>
+    <div class="table-container">
+        <table class="admin-table" role="table">
+            <thead>
+                <tr>
+                    <th scope="col">Client</th>
+                    <th scope="col">Service</th>
+                    <th scope="col">Booking</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Sent</th>
+                    <th scope="col">Expires</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($recentReviewRequests)): ?>
+                    <tr><td colspan="6" class="text-center">No review requests yet — mark a booking completed to create one.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($recentReviewRequests as $request): ?>
+                        <tr>
+                            <td>
+                                <span class="client-name"><?php echo htmlspecialchars($request['client_name']); ?></span>
+                                <span class="client-email"><?php echo htmlspecialchars($request['email']); ?></span>
+                            </td>
+                            <td><?php echo htmlspecialchars($request['service_name']); ?></td>
+                            <td>#<?php echo (int)$request['booking_id']; ?> · <?php echo date('M j, Y', strtotime($request['booking_date'])); ?></td>
+                            <td><span class="status-badge status-<?php echo htmlspecialchars($request['status']); ?>"><?php echo htmlspecialchars($request['status']); ?></span></td>
+                            <td><?php echo !empty($request['sent_at']) ? date('M j · g:i A', strtotime($request['sent_at'])) : '—'; ?></td>
+                            <td><?php echo !empty($request['expires_at']) ? date('M j, Y', strtotime($request['expires_at'])) : '—'; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="admin-section">
+    <div class="section-header">
+        <h2 class="section-title">Recent Queued Emails</h2>
+    </div>
+    <div class="table-container">
+        <table class="admin-table" role="table">
+            <thead>
+                <tr>
+                    <th scope="col">Recipient</th>
+                    <th scope="col">Template</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Scheduled</th>
+                    <th scope="col">Attempts</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($recentEmails)): ?>
+                    <tr><td colspan="5" class="text-center">No queued emails yet.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($recentEmails as $email): ?>
+                        <tr>
+                            <td>
+                                <span class="client-name"><?php echo htmlspecialchars($email['recipient_name'] ?: 'Client'); ?></span>
+                                <span class="client-email"><?php echo htmlspecialchars($email['recipient_email']); ?></span>
+                            </td>
+                            <td><?php echo htmlspecialchars(str_replace('_', ' ', $email['template'])); ?></td>
+                            <td><span class="status-badge status-<?php echo htmlspecialchars($email['status']); ?>"><?php echo htmlspecialchars($email['status']); ?></span></td>
+                            <td><?php echo date('M j, Y · g:i A', strtotime($email['scheduled_at'])); ?></td>
+                            <td><?php echo (int)$email['attempts']; ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="admin-detail-grid growth-detail-grid">
+    <section class="admin-section detail-main">
+        <div class="section-header">
+            <h2 class="section-title">Referral Conversions</h2>
+        </div>
+        <div class="detail-card growth-list-card">
+            <dl class="detail-list growth-metric-list">
+                <div class="detail-item"><dt>Total</dt><dd><?php echo (int)$referrals['total']; ?></dd></div>
+                <div class="detail-item"><dt>Converted</dt><dd><?php echo (int)$referrals['converted']; ?></dd></div>
+                <div class="detail-item"><dt>Credited</dt><dd><?php echo (int)$referrals['credited']; ?></dd></div>
+            </dl>
+            <div class="growth-mini-list">
+                <?php if (empty($recentReferrals)): ?>
+                    <p class="funnel-hint">No referrals recorded yet.</p>
+                <?php else: ?>
+                    <?php foreach ($recentReferrals as $referral): ?>
+                        <div class="growth-mini-item">
+                            <strong><?php echo htmlspecialchars($referral['referrer_name']); ?></strong>
+                            <span>referred <?php echo htmlspecialchars($referral['referred_name'] ?: $referral['referred_email']); ?> · <?php echo htmlspecialchars($referral['status']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
+    <section class="admin-section detail-sidebar">
+        <div class="section-header">
+            <h2 class="section-title">Manual Credits</h2>
+        </div>
+        <div class="detail-card growth-list-card">
+            <dl class="detail-list growth-metric-list">
+                <div class="detail-item"><dt>Total</dt><dd><?php echo (int)$credits['total']; ?></dd></div>
+                <div class="detail-item"><dt>Pending</dt><dd><?php echo (int)$credits['pending']; ?></dd></div>
+                <div class="detail-item"><dt>Approved</dt><dd><?php echo (int)$credits['approved']; ?></dd></div>
+                <div class="detail-item"><dt>Redeemed</dt><dd><?php echo (int)$credits['redeemed']; ?></dd></div>
+            </dl>
+            <div class="growth-mini-list">
+                <?php if (empty($recentCredits)): ?>
+                    <p class="funnel-hint">No credits recorded yet.</p>
+                <?php else: ?>
+                    <?php foreach ($recentCredits as $credit): ?>
+                        <div class="growth-mini-item">
+                            <strong><?php echo htmlspecialchars($credit['client_name']); ?></strong>
+                            <span><?php echo htmlspecialchars($credit['description']); ?> · <?php echo htmlspecialchars($credit['status']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </section>
 </div>

@@ -46,6 +46,13 @@
                     <input type="tel" name="phone" id="phone" class="form-input" autocomplete="tel" value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>">
                 </div>
 
+                <?php $referralValue = $_POST['referral_code'] ?? ($referralCode ?? ''); ?>
+                <div class="form-group referral-field">
+                    <label for="referral_code" class="form-label">Referral Code (Optional)</label>
+                    <input type="text" name="referral_code" id="referral_code" class="form-input" autocomplete="off" value="<?php echo htmlspecialchars($referralValue); ?>" placeholder="TBN...">
+                    <small class="form-hint">If a friend shared a code, enter it here. Referral credits are reviewed by the salon team.</small>
+                </div>
+
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
                     <input type="password" name="password" id="password" class="form-input" required autocomplete="new-password" minlength="8">

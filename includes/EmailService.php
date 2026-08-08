@@ -81,6 +81,46 @@ class EmailService {
         return $this->send($ownerEmail, $subject, $body);
     }
 
+    public function buildReviewRequestEmail($request, $reviewUrl) {
+        $clientName = trim(($request['first_name'] ?? '') . ' ' . ($request['last_name'] ?? '')) ?: 'there';
+        $serviceName = $request['service_name'] ?? 'your nail appointment';
+        $date = !empty($request['booking_date']) ? date('F j, Y', strtotime($request['booking_date'])) : 'your recent visit';
+        $time = (!empty($request['start_time']) && !empty($request['end_time']))
+            ? date('g:i A', strtotime($request['start_time'])) . ' - ' . date('g:i A', strtotime($request['end_time']))
+            : '';
+
+        return [
+            'subject' => 'How did your Tips by Nadine appointment go?',
+            'body' => "
+                <h2>Thank you for visiting Tips by Nadine</h2>
+                <p>Hi <strong>" . htmlspecialchars($clientName) . "</strong>,</p>
+                <p>We hope you loved your <strong>" . htmlspecialchars($serviceName) . "</strong> appointment on " . htmlspecialchars($date) . "" . ($time ? ' at ' . htmlspecialchars($time) : '') . ".</p>
+                <p>Your feedback helps future clients choose with confidence and helps Tips by Nadine keep improving.</p>
+                <p style='text-align:center;margin:28px 0;'>
+                    <a href='" . htmlspecialchars($reviewUrl) . "' style='background:#cd4e0a;color:#fff;padding:13px 24px;border-radius:999px;text-decoration:none;font-weight:700;'>Leave a Review</a>
+                </p>
+                <p>If the button does not work, copy this link into your browser:<br>" . htmlspecialchars($reviewUrl) . "</p>
+                <p>Warm regards,<br><strong>Tips by Nadine Team</strong></p>
+            ",
+        ];
+    }
+
+    public function buildReferralThankYouEmail($referrer, $newClient) {
+        $referrerName = trim(($referrer['first_name'] ?? '') . ' ' . ($referrer['last_name'] ?? '')) ?: 'there';
+        $newClientName = trim(($newClient['first_name'] ?? '') . ' ' . ($newClient['last_name'] ?? '')) ?: 'your friend';
+
+        return [
+            'subject' => 'Thank you for sharing Tips by Nadine',
+            'body' => "
+                <h2>Your referral joined Tips by Nadine</h2>
+                <p>Hi <strong>" . htmlspecialchars($referrerName) . "</strong>,</p>
+                <p>Thank you for sharing Tips by Nadine with <strong>" . htmlspecialchars($newClientName) . "</strong>. Personal recommendations mean a lot to a small salon.</p>
+                <p>We have recorded this referral for admin review. If a referral thank-you credit is offered, the team will handle it manually at the salon.</p>
+                <p>Warm regards,<br><strong>Tips by Nadine Team</strong></p>
+            ",
+        ];
+    }
+
     private function getConfirmationTemplate($userName, $details) {
         $date = date('F j, Y', strtotime($details['booking_date']));
         $time = date('g:i A', strtotime($details['start_time'])) . ' - ' . date('g:i A', strtotime($details['end_time']));

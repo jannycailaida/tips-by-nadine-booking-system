@@ -3276,3 +3276,114 @@ html {
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
 }
+
+/* ============================================================
+   Tier 3 — Rebooking and referral growth loop
+   ============================================================ */
+.rebook-banner,
+.referral-panel {
+    max-width: 900px;
+    margin: 0 auto var(--spacing-lg);
+    padding: var(--spacing-lg);
+    border: 1px solid rgba(205, 78, 10, 0.22);
+    border-radius: var(--radius-lg);
+    background:
+        radial-gradient(circle at top left, rgba(205, 78, 10, 0.13), transparent 34%),
+        linear-gradient(135deg, #fffaf3 0%, var(--color-surface) 72%);
+    box-shadow: var(--shadow-sm);
+}
+
+.rebook-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+}
+
+.rebook-banner h2,
+.referral-panel h2 {
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-primary);
+}
+
+.rebook-banner p,
+.referral-panel p {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+.rebook-reference {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-dark);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.referral-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.referral-link-wrap,
+.referral-mini {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.referral-link-input {
+    min-width: 0;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.referral-mini {
+    max-width: 640px;
+    margin: var(--spacing-md) auto 0;
+    padding: var(--spacing-sm);
+    border: 1px dashed rgba(205, 78, 10, 0.36);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-muted);
+}
+
+.referral-mini span {
+    white-space: nowrap;
+    color: var(--color-primary);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+    .rebook-banner,
+    .referral-panel {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+    }
+
+    .rebook-banner,
+    .referral-link-wrap,
+    .referral-mini {
+        flex-direction: column;
+    }
+
+    .rebook-reference,
+    .referral-link-wrap .btn,
+    .referral-mini .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .confirmation-actions {
+        flex-wrap: wrap;
+    }
+}

@@ -21,6 +21,7 @@ class BookingController extends BaseController {
     public function showBooking() {
         Auth::requireUser();
 
+        $userId = Auth::getUserId();
         $serviceModel = new Service();
         $designModel = new NailDesign();
         $timeSlotModel = new TimeSlot();
@@ -28,14 +29,38 @@ class BookingController extends BaseController {
         $services = $serviceModel->getActive();
         $designs = $designModel->getActive();
         $categories = (new \Category())->getActive();
+        $old = [];
+        $rebookBooking = null;
+
+        $rebookId = (int)($_GET['rebook'] ?? 0);
+        if ($rebookId) {
+            $bookingModel = new Booking();
+            $previousBooking = $bookingModel->getBookingDetails($rebookId);
+            if ($previousBooking && (int)$previousBooking['user_id'] === (int)$userId && $previousBooking['status'] !== 'cancelled') {
+                $rebookBooking = $previousBooking;
+                $old = [
+                    'service_id' => $previousBooking['service_id'],
+                    'design_id' => $previousBooking['nail_design_id'],
+                    'notes' => $previousBooking['notes'],
+                    'rebook_booking_id' => $previousBooking['id'],
+                ];
+
+                (new AnalyticsEvent())->track('rebook_started', $userId, $previousBooking['id'], [
+                    'service_id' => $previousBooking['service_id'],
+                    'design_id' => $previousBooking['nail_design_id'],
+                ]);
+            }
+        }
 
         // Funnel analytics — a visitor entering the booking flow (Tier 2).
-        (new AnalyticsEvent())->track('booking_started', Auth::getUserId());
+        (new AnalyticsEvent())->track('booking_started', $userId);
 
         $this->view('booking/create', [
             'services' => $services,
             'designs' => $designs,
             'categories' => $categories,
+            'old' => $old,
+            'rebookBooking' => $rebookBooking,
             'meta' => [
                 'title' => 'Book an Appointment - Tips by Nadine',
                 'description' => 'Reserve your nail appointment online at Tips by Nadine — choose a service, design, and real-time time slot. Instant confirmation by email.',
@@ -85,6 +110,7 @@ class BookingController extends BaseController {
         $date = $_POST['booking_date'] ?? '';
         $timeSlotId = (int)($_POST['time_slot_id'] ?? 0);
         $notes = trim($_POST['notes'] ?? '');
+        $rebookBookingId = (int)($_POST['rebook_booking_id'] ?? 0);
 
         $errors = [];
 
@@ -99,6 +125,14 @@ class BookingController extends BaseController {
 
         // Check availability
         $bookingModel = new Booking();
+        $rebookFromBooking = null;
+        if ($rebookBookingId) {
+            $rebookFromBooking = $bookingModel->getBookingDetails($rebookBookingId);
+            if (!$rebookFromBooking || (int)$rebookFromBooking['user_id'] !== (int)$userId || $rebookFromBooking['status'] === 'cancelled') {
+                $rebookBookingId = 0;
+                $rebookFromBooking = null;
+            }
+        }
         if (!$bookingModel->checkAvailability($date, $timeSlotId)) {
             $errors[] = 'This time slot is no longer available.';
         }
@@ -130,6 +164,7 @@ class BookingController extends BaseController {
                 'pageTitle' => 'Book Appointment - Tips by Nadine',
                 'errors' => $errors,
                 'old' => $_POST,
+                'rebookBooking' => $rebookFromBooking,
                 'ai_recommendations' => $aiRecommendations,
             ]);
             return;
@@ -183,7 +218,16 @@ class BookingController extends BaseController {
         (new AnalyticsEvent())->track('booking_completed', $userId, $bookingId, [
             'service_id' => $serviceId,
             'design_id' => $designId,
+            'rebook_from_booking_id' => $rebookBookingId ?: null,
         ]);
+
+        if ($rebookFromBooking) {
+            (new AnalyticsEvent())->track('rebook_completed', $userId, $bookingId, [
+                'from_booking_id' => $rebookFromBooking['id'],
+                'service_id' => $serviceId,
+                'design_id' => $designId,
+            ]);
+        }
 
         $emailService = new EmailService();
         $emailService->sendBookingConfirmation($user['email'], $user['first_name'], $bookingDetails);
@@ -225,6 +269,7 @@ class BookingController extends BaseController {
         // Tier 2 — add-to-calendar (Google Calendar + .ics), directions link.
         $config = require __DIR__ . '/../config/app.php';
         $location = $this->getBusinessLocation($config);
+        $referralLink = (new User())->getReferralLink(Auth::getUserId());
         $this->view('booking/confirmation', [
             'booking' => $booking,
             'ai_recommendations' => $aiRecommendations,
@@ -233,6 +278,7 @@ class BookingController extends BaseController {
             'calendarUrl' => $this->buildGoogleCalendarUrl($booking, $config),
             'icsUrl' => base_url('calendar.php?id=' . $booking['id']),
             'social' => $config['business']['social'] ?? [],
+            'referralLink' => $referralLink,
             'noindex' => true,
             'meta' => [
                 'title' => $label . ' - Tips by Nadine',
@@ -246,11 +292,14 @@ class BookingController extends BaseController {
     public function myBookings() {
         Auth::requireUser();
 
+        $userId = Auth::getUserId();
         $bookingModel = new Booking();
-        $bookings = $bookingModel->getUserBookings(Auth::getUserId());
+        $bookings = $bookingModel->getUserBookings($userId);
+        $referralLink = (new User())->getReferralLink($userId);
 
         $this->view('booking/my-bookings', [
             'bookings' => $bookings,
+            'referralLink' => $referralLink,
             'noindex' => true,
             'meta' => [
                 'title' => 'My Bookings - Tips by Nadine',

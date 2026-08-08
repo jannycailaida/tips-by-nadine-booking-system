@@ -6,6 +6,9 @@
 
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Referral.php';
+require_once __DIR__ . '/../models/EmailQueue.php';
+require_once __DIR__ . '/../models/UserCredit.php';
 require_once __DIR__ . '/../includes/Auth.php';
 require_once __DIR__ . '/../includes/EmailService.php';
 
@@ -49,8 +52,11 @@ class AuthController extends BaseController {
 
     public function showRegister() {
         Auth::redirectIfLoggedIn();
+        $referralCode = trim($_GET['ref'] ?? '');
+
         $this->view('auth/register', [
             'pageTitle' => 'Register - Tips by Nadine',
+            'referralCode' => $referralCode,
         ]);
     }
 
@@ -63,6 +69,7 @@ class AuthController extends BaseController {
         $lastName = trim($_POST['last_name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
+        $referralCode = trim($_POST['referral_code'] ?? '');
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
@@ -84,11 +91,30 @@ class AuthController extends BaseController {
                 'pageTitle' => 'Register - Tips by Nadine',
                 'errors' => $errors,
                 'old' => $_POST,
+                'referralCode' => $referralCode,
             ]);
             return;
         }
 
         $userId = $userModel->createUser($email, $password, $firstName, $lastName, $phone);
+        $newUser = $userModel->find($userId);
+
+        if ($referralCode !== '') {
+            $referral = (new Referral())->registerConversion($referralCode, $userId, $email);
+            if ($referral && !empty($referral['referrer_user_id'])) {
+                $referrer = $userModel->find($referral['referrer_user_id']);
+                if ($referrer) {
+                    (new EmailQueue())->queueReferralNotice($referrer, $newUser);
+                    (new UserCredit())->recordCredit(
+                        $referrer['id'],
+                        'referral',
+                        'Referral from ' . trim($firstName . ' ' . $lastName),
+                        0,
+                        $referral['id']
+                    );
+                }
+            }
+        }
 
         // Send welcome email
         $emailService = new EmailService();
@@ -97,7 +123,7 @@ class AuthController extends BaseController {
             <p>Thank you for registering at Tips by Nadine. You can now book appointments online.</p>
         ");
 
-        Auth::loginUser($userModel->find($userId));
+        Auth::loginUser($newUser);
         $this->redirect('/dashboard.php');
     }
 

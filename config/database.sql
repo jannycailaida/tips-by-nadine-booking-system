@@ -1,8 +1,8 @@
 -- Database Schema for Tips by Nadine Booking System
 -- MySQL Database
 
-CREATE DATABASE IF NOT EXISTS tips_by_nadine CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE tips_by_nadine;
+CREATE DATABASE IF NOT EXISTS salonDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE salonDB;
 
 -- Users table (clients)
 CREATE TABLE IF NOT EXISTS users (
@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
+    referral_code VARCHAR(32) NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -123,6 +124,115 @@ CREATE TABLE IF NOT EXISTS email_logs (
     sent_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Landing-page lead capture (Tier 2 marketing baseline)
+CREATE TABLE IF NOT EXISTS leads (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(190) NOT NULL,
+    user_id INT UNSIGNED NULL,
+    source VARCHAR(50) NOT NULL DEFAULT 'landing',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_lead_email (email)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Lightweight marketing and booking analytics events
+CREATE TABLE IF NOT EXISTS analytics_events (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    event VARCHAR(50) NOT NULL,
+    user_id INT UNSIGNED NULL,
+    booking_id INT UNSIGNED NULL,
+    meta TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_event_name (event),
+    KEY idx_event_created (created_at)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Tokenized review links sent after completed appointments (Tier 3)
+CREATE TABLE IF NOT EXISTS review_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_id INT NOT NULL,
+    user_id INT NOT NULL,
+    review_id INT NULL,
+    token CHAR(64) NOT NULL UNIQUE,
+    status ENUM('pending', 'opened', 'submitted', 'expired') NOT NULL DEFAULT 'pending',
+    expires_at DATETIME NULL,
+    sent_at DATETIME NULL,
+    opened_at DATETIME NULL,
+    submitted_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_review_request_booking (booking_id),
+    KEY idx_review_request_token (token),
+    KEY idx_review_request_status (status),
+    KEY idx_review_request_expires (expires_at),
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Safe queued email sender for Tier 3 review and referral follow-ups
+CREATE TABLE IF NOT EXISTS email_queue (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recipient_email VARCHAR(255) NOT NULL,
+    recipient_name VARCHAR(150) NULL,
+    subject VARCHAR(500) NOT NULL,
+    body MEDIUMTEXT NOT NULL,
+    template VARCHAR(80) NOT NULL DEFAULT 'custom',
+    related_id INT NULL,
+    status ENUM('pending', 'processing', 'sent', 'failed', 'cancelled') NOT NULL DEFAULT 'pending',
+    scheduled_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    sent_at DATETIME NULL,
+    attempts INT NOT NULL DEFAULT 0,
+    last_error TEXT NULL,
+    meta TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_email_queue_due (status, scheduled_at),
+    KEY idx_email_queue_template (template),
+    KEY idx_email_queue_related (template, related_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Referral conversion tracking. Credits remain manual/administrative, not payment automation (Tier 3)
+CREATE TABLE IF NOT EXISTS referrals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    referrer_user_id INT NOT NULL,
+    referred_user_id INT NULL,
+    referral_code VARCHAR(32) NOT NULL,
+    referred_email VARCHAR(255) NULL,
+    status ENUM('registered', 'converted', 'credited') NOT NULL DEFAULT 'converted',
+    converted_at DATETIME NULL,
+    credited_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_referred_user (referred_user_id),
+    KEY idx_referrals_referrer (referrer_user_id),
+    KEY idx_referrals_code (referral_code),
+    FOREIGN KEY (referrer_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Manual goodwill/referral/review credits for admin visibility only (Tier 3)
+CREATE TABLE IF NOT EXISTS user_credits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    referral_id INT NULL,
+    review_request_id INT NULL,
+    credit_type ENUM('referral', 'review', 'goodwill') NOT NULL DEFAULT 'goodwill',
+    description VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    status ENUM('pending', 'approved', 'redeemed', 'void') NOT NULL DEFAULT 'pending',
+    created_by_admin_id INT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_user_credits_user (user_id),
+    KEY idx_user_credits_type (credit_type),
+    KEY idx_user_credits_status (status),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (referral_id) REFERENCES referrals(id) ON DELETE SET NULL,
+    FOREIGN KEY (review_request_id) REFERENCES review_requests(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by_admin_id) REFERENCES admins(id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Insert default admin (password: admin123 - change in production!)
 INSERT INTO admins (email, password_hash, first_name, last_name, role) VALUES

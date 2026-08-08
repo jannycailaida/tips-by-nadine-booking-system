@@ -5,7 +5,7 @@
         <a href="<?php echo base_url('admin/leads.php?export=csv'); ?>" class="btn btn-primary">Export CSV</a>
     </div>
     <p class="admin-page-subtitle">
-        Emails captured on the landing page — your starter retargeting list for campaigns &amp; promos.
+        Emails captured on the landing page — your clean contact list for future salon updates.
         <?php echo $total > 0 ? '<strong>' . number_format($total) . '</strong> signup' . ($total === 1 ? '' : 's') . ' so far.' : 'No signups yet — the form lives under the home-page CTA.'; ?>
     </p>
 </div>

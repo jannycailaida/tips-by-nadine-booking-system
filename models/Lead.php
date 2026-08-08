@@ -3,9 +3,8 @@
  * Lead Model
  * Tips by Nadine Booking System
  *
- * Landing-page email captures — a starter retargeting list. One row per
- * unique email; repeats re-use the row (their user_id/source are updated)
- * so the list stays clean for mail campaigns.
+ * Landing-page email captures. One row per unique email; repeats re-use the
+ * row (their user_id/source are updated) so the contact list stays clean.
  */
 
 require_once __DIR__ . '/BaseModel.php';

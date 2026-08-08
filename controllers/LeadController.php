@@ -4,7 +4,7 @@
  * Tips by Nadine Booking System
  *
  * Landing-page email capture. Accepts JSON (AJAX, preferred) or a plain
- * form POST (no-JS fallback) and builds the starter retargeting list.
+ * form POST (no-JS fallback) and keeps the salon contact list tidy.
  */
 
 require_once __DIR__ . '/BaseController.php';
@@ -43,7 +43,7 @@ class LeadController extends BaseController {
         $existing = $leadModel->getByEmail($email);
 
         if ($existing) {
-            // Reuse the row — keep the list clean for mail campaigns.
+            // Reuse the row — keep the contact list clean.
             $leadModel->refresh($existing['id'], [
                 'user_id' => $userId ?: $existing['user_id'],
                 'source'  => 'landing',

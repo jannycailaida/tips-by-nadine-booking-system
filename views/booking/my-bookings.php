@@ -8,6 +8,20 @@
 
 <section class="bookings-section">
     <div class="container">
+        <?php if (!empty($referralLink)): ?>
+            <div class="referral-panel">
+                <div>
+                    <p class="eyebrow">Share your glow</p>
+                    <h2>Invite a friend to Tips by Nadine</h2>
+                    <p>Send your personal booking link. Referral credits are reviewed manually by the salon team.</p>
+                </div>
+                <div class="referral-link-wrap">
+                    <input type="text" class="form-input referral-link-input" value="<?php echo htmlspecialchars($referralLink); ?>" readonly aria-label="Your referral link">
+                    <a href="mailto:?subject=Book%20with%20Tips%20by%20Nadine&body=<?php echo rawurlencode('Book your nail appointment with Tips by Nadine: ' . $referralLink); ?>" class="btn btn-secondary">Share</a>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php if (empty($bookings)): ?>
             <div class="empty-state">
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -34,6 +48,7 @@
             <div class="bookings-list">
                 <?php foreach ($bookings as $booking):
                     $canCancel = in_array($booking['status'], ['pending', 'confirmed']) && $booking['booking_date'] >= $today;
+                    $canRebook = $booking['status'] !== 'cancelled' && ($booking['status'] === 'completed' || $booking['booking_date'] < $today);
                     $dataState = $booking['status'] === 'cancelled' ? 'cancelled' : ($canCancel ? 'upcoming' : 'past');
                     $whenLabel = date('D, M j', strtotime($booking['booking_date'])) . ' · ' . date('g:i A', strtotime($booking['start_time']));
                 ?>
@@ -97,6 +112,9 @@
                             <div class="booking-actions">
                                 <?php if ($canCancel): ?>
                                     <button type="button" class="btn btn-sm btn-cancel" data-booking-id="<?php echo $booking['id']; ?>" data-when="<?php echo htmlspecialchars($whenLabel); ?>">Cancel</button>
+                                <?php endif; ?>
+                                <?php if ($canRebook): ?>
+                                    <a href="<?php echo base_url('booking.php?rebook=' . $booking['id']); ?>" class="btn btn-sm btn-primary">Book Again</a>
                                 <?php endif; ?>
                                 <a href="<?php echo base_url('booking/confirmation.php?id=' . $booking['id']); ?>" class="btn btn-sm btn-secondary">Details</a>
                             </div>

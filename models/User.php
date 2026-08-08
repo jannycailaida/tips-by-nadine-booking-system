@@ -8,20 +8,69 @@ require_once __DIR__ . '/BaseModel.php';
 
 class User extends BaseModel {
     protected $table = 'users';
+    private $hasReferralCodeColumn;
 
     public function findByEmail($email) {
         return $this->db->fetch("SELECT * FROM {$this->table} WHERE email = ?", [$email]);
     }
 
+    public function findByReferralCode($code) {
+        if (!$this->hasReferralCodeColumn()) {
+            return null;
+        }
+
+        $code = $this->normalizeReferralCode($code);
+        if ($code === '') {
+            return null;
+        }
+
+        return $this->db->fetch("SELECT * FROM {$this->table} WHERE referral_code = ? LIMIT 1", [$code]);
+    }
+
     public function createUser($email, $password, $firstName, $lastName, $phone = null) {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-        return $this->create([
+        $data = [
             'email' => $email,
             'password_hash' => $passwordHash,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'phone' => $phone,
-        ]);
+        ];
+
+        if ($this->hasReferralCodeColumn()) {
+            $data['referral_code'] = $this->generateUniqueReferralCode($firstName, $lastName);
+        }
+
+        return $this->create($data);
+    }
+
+    public function ensureReferralCode($userId) {
+        if (!$this->hasReferralCodeColumn()) {
+            return null;
+        }
+
+        $user = $this->find($userId);
+        if (!$user) {
+            return null;
+        }
+
+        if (!empty($user['referral_code'])) {
+            return $user['referral_code'];
+        }
+
+        $code = $this->generateUniqueReferralCode($user['first_name'], $user['last_name']);
+        $this->db->update($this->table, ['referral_code' => $code], 'id = ?', [$userId]);
+        return $code;
+    }
+
+    public function getReferralLink($userId) {
+        $code = $this->ensureReferralCode($userId);
+        if (!$code) {
+            return null;
+        }
+
+        $config = require __DIR__ . '/../config/app.php';
+        return rtrim($config['app']['url'], '/') . '/register.php?ref=' . urlencode($code);
     }
 
     public function verifyPassword($password, $hash) {
@@ -40,5 +89,33 @@ class User extends BaseModel {
             WHERE b.user_id = ?
             ORDER BY b.booking_date DESC, ts.start_time ASC
         ", [$userId]);
+    }
+
+    private function generateUniqueReferralCode($firstName = '', $lastName = '') {
+        $prefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $firstName . $lastName), 0, 3));
+        if (strlen($prefix) < 3) {
+            $prefix = 'TBN';
+        }
+
+        do {
+            $code = 'TBN' . $prefix . random_int(1000, 9999);
+            $exists = $this->findByReferralCode($code);
+        } while ($exists);
+
+        return $code;
+    }
+
+    private function normalizeReferralCode($code) {
+        return strtoupper(preg_replace('/[^A-Za-z0-9]/', '', trim($code)));
+    }
+
+    private function hasReferralCodeColumn() {
+        if ($this->hasReferralCodeColumn !== null) {
+            return $this->hasReferralCodeColumn;
+        }
+
+        $column = $this->db->fetch("SHOW COLUMNS FROM {$this->table} LIKE 'referral_code'");
+        $this->hasReferralCodeColumn = (bool)$column;
+        return $this->hasReferralCodeColumn;
     }
 }

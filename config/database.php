@@ -6,7 +6,7 @@
 
 return [
     'host' => 'localhost',
-    'dbname' => 'tips_by_nadine',
+    'dbname' => 'salonDB',
     'username' => 'root',
     'password' => '',
     'charset' => 'utf8mb4',

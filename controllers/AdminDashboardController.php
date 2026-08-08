@@ -12,6 +12,10 @@ require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/Lead.php';
 require_once __DIR__ . '/../models/AnalyticsEvent.php';
+require_once __DIR__ . '/../models/ReviewRequest.php';
+require_once __DIR__ . '/../models/EmailQueue.php';
+require_once __DIR__ . '/../models/Referral.php';
+require_once __DIR__ . '/../models/UserCredit.php';
 require_once __DIR__ . '/../includes/Auth.php';
 require_once __DIR__ . '/../config/app.php';
 
@@ -97,7 +101,22 @@ class AdminDashboardController extends BaseController {
             (new AnalyticsEvent())->track('booking_confirmed', null, $bookingId);
         }
 
-        $this->flash('success', 'Booking #' . $bookingId . ' status updated to ' . ucfirst($status) . '.');
+        $growthNote = '';
+        if ($status === 'completed') {
+            $request = (new ReviewRequest())->createForBooking($bookingId);
+            if ($request) {
+                if (!empty($request['is_new'])) {
+                    (new AnalyticsEvent())->track('review_requested', $request['user_id'], $bookingId, [
+                        'review_request_id' => $request['id'],
+                    ]);
+                }
+
+                $queueId = (new EmailQueue())->queueReviewRequest($request);
+                $growthNote = $queueId ? ' Review request queued.' : ' Review request already exists.';
+            }
+        }
+
+        $this->flash('success', 'Booking #' . $bookingId . ' status updated to ' . ucfirst($status) . '.' . $growthNote);
         $this->redirect('/admin/bookings.php');
     }
 
@@ -319,6 +338,15 @@ class AdminDashboardController extends BaseController {
 
         $this->renderAdminView('admin/analytics/index', [
             'funnel' => $analytics->getFunnelCounts(),
+            'growth' => $analytics->getGrowthCounts(),
+            'reviewRequests' => (new ReviewRequest())->getStats(),
+            'emailQueue' => (new EmailQueue())->getStats(),
+            'referrals' => (new Referral())->getStats(),
+            'credits' => (new UserCredit())->getStats(),
+            'recentReviewRequests' => (new ReviewRequest())->getRecent(6),
+            'recentEmails' => (new EmailQueue())->getRecent(6),
+            'recentReferrals' => (new Referral())->getRecent(6),
+            'recentCredits' => (new UserCredit())->getRecent(6),
             'daily' => $analytics->getDailyCounts(14),
             'recentEvents' => $analytics->getRecent(40),
             'pageTitle' => 'Analytics - Admin - Tips by Nadine',

@@ -8,11 +8,20 @@
  * leads captured — so future decisions have real numbers instead of vibes.
  *
  * Event names (kept lowercase, underscore-separated):
- *   booking_started   — visitor reaches the booking form
- *   booking_completed — booking successfully created
- *   booking_confirmed — admin confirms a pending booking
- *   booking_cancelled — user/admin cancels a booking
- *   lead_captured     — email captured on the landing page
+ *   booking_started    — visitor reaches the booking form
+ *   booking_completed  — booking successfully created
+ *   booking_confirmed  — admin confirms a pending booking
+ *   booking_cancelled  — user/admin cancels a booking
+ *   lead_captured      — email captured on the landing page
+ *   review_requested   — completed booking generated a review request
+ *   review_opened      — client opened a tokenized review link
+ *   review_submitted   — client submitted a tokenized review
+ *   email_queued       — follow-up email queued for later sending
+ *   email_sent         — queued email delivered by the sender
+ *   email_failed       — queued email sender failed
+ *   referral_converted — new client joined from a referral code
+ *   rebook_started     — client started a book-again flow
+ *   rebook_completed   — client booked again from a previous booking
  */
 
 require_once __DIR__ . '/BaseModel.php';
@@ -47,10 +56,10 @@ class AnalyticsEvent extends BaseModel {
      * Counts for the funnel dashboard.
      */
     public function getFunnelCounts() {
-        $events = ['booking_started', 'booking_completed', 'booking_confirmed', 'booking_cancelled', 'lead_captured'];
+        $events = array_merge($this->getBookingEvents(), $this->getGrowthEvents());
         $counts = ['all_events' => 0];
         foreach ($events as $event) {
-            $counts[$event] = $this->countEvent($event);
+            $counts[$event] = (int)$this->countEvent($event);
             $counts['all_events'] += $counts[$event];
         }
         // Booking→completion conversion as a clean percentage (0 when unused).
@@ -61,6 +70,23 @@ class AnalyticsEvent extends BaseModel {
         } else {
             $counts['completion_rate'] = 0;
         }
+        return $counts;
+    }
+
+    public function getGrowthCounts() {
+        $events = $this->getGrowthEvents();
+        $counts = [];
+        foreach ($events as $event) {
+            $counts[$event] = (int)$this->countEvent($event);
+        }
+
+        $counts['review_completion_rate'] = $counts['review_requested'] > 0
+            ? round($counts['review_submitted'] / $counts['review_requested'] * 100, 1)
+            : 0;
+        $counts['email_success_rate'] = ($counts['email_sent'] + $counts['email_failed']) > 0
+            ? round($counts['email_sent'] / ($counts['email_sent'] + $counts['email_failed']) * 100, 1)
+            : 0;
+
         return $counts;
     }
 
@@ -110,5 +136,23 @@ class AnalyticsEvent extends BaseModel {
             ];
         }
         return $series;
+    }
+
+    private function getBookingEvents() {
+        return ['booking_started', 'booking_completed', 'booking_confirmed', 'booking_cancelled', 'lead_captured'];
+    }
+
+    private function getGrowthEvents() {
+        return [
+            'review_requested',
+            'review_opened',
+            'review_submitted',
+            'email_queued',
+            'email_sent',
+            'email_failed',
+            'referral_converted',
+            'rebook_started',
+            'rebook_completed',
+        ];
     }
 }
