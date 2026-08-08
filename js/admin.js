@@ -176,11 +176,96 @@
     }
 
     /* ============================================================
+       Review Modal (Add / Edit)
+       ============================================================ */
+    function initReviewModal() {
+        var modal = qs('#review-modal');
+        if (!modal) return;
+
+        var addBtn = qs('#add-review-btn');
+        var editBtns = qsa('.edit-review-btn');
+        var closeButtons = qsa('.modal-close, .modal-cancel', modal);
+        var overlay = qs('.modal-overlay', modal);
+        var title = qs('#review-modal-title', modal);
+        var form = qs('#review-form', modal);
+        var reviewIdInput = qs('#review_id', modal);
+
+        var fields = {
+            client_name: qs('#review_client_name', modal),
+            rating: qs('#review_rating', modal),
+            review_text: qs('#review_text', modal),
+            service_name: qs('#review_service', modal),
+            design_id: qs('#review_design', modal),
+            is_active: qs('input[name="is_active"]', modal)
+        };
+
+        function openModal(mode, review) {
+            form.reset();
+            if (reviewIdInput) reviewIdInput.value = '';
+
+            if (mode === 'edit' && review) {
+                if (title) title.textContent = 'Edit Review';
+                if (reviewIdInput) reviewIdInput.value = review.id;
+                if (fields.client_name) fields.client_name.value = review.client_name || '';
+                if (fields.rating) fields.rating.value = String(review.rating || '');
+                if (fields.review_text) fields.review_text.value = review.review_text || '';
+                if (fields.service_name) fields.service_name.value = review.service_name || '';
+                if (fields.design_id) fields.design_id.value = review.design_id || '';
+                if (fields.is_active) fields.is_active.checked = Number(review.is_active) === 1;
+            } else {
+                if (title) title.textContent = 'Add Review';
+                if (fields.is_active) fields.is_active.checked = true;
+            }
+
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            if (fields.client_name) {
+                setTimeout(function () { fields.client_name.focus(); }, 50);
+            }
+        }
+
+        function closeModal() {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+        }
+
+        if (addBtn) {
+            addBtn.addEventListener('click', function () {
+                openModal('add');
+            });
+        }
+
+        editBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                try {
+                    var review = JSON.parse(btn.getAttribute('data-review') || '{}');
+                    openModal('edit', review);
+                } catch (e) {
+                    openModal('add');
+                }
+            });
+        });
+
+        closeButtons.forEach(function (btn) {
+            btn.addEventListener('click', closeModal);
+        });
+
+        if (overlay) {
+            overlay.addEventListener('click', closeModal);
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.hidden) closeModal();
+        });
+    }
+
+    /* ============================================================
        Init
        ============================================================ */
     onReady(function () {
         initSidebar();
         initDesignModal();
         initDesignImagePreview();
+        initReviewModal();
     });
 })();

@@ -31,6 +31,11 @@
             </form>
         </div>
 
+        <div class="gallery-hashtag reveal-fade">
+            <span class="gallery-hashtag-icon" aria-hidden="true">✦</span>
+            A look you love? Book it, then tag <strong>#TipsByNadine</strong> — we feature client nails on our feed.
+        </div>
+
         <!-- Designs Grid -->
         <div class="designs-grid gallery-grid">
             <?php if (empty($designs)): ?>

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/Admin.php';
 require_once __DIR__ . '/../models/Booking.php';
 require_once __DIR__ . '/../models/NailDesign.php';
 require_once __DIR__ . '/../models/Category.php';
+require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../includes/Auth.php';
 require_once __DIR__ . '/../config/app.php';
 
@@ -182,6 +183,86 @@ class AdminDashboardController extends BaseController {
         }
 
         $this->redirect('/admin/designs.php');
+    }
+
+    public function reviews() {
+        Auth::requireAdmin();
+
+        $reviewModel = new Review();
+        $designModel = new NailDesign();
+        [$avgRating, $reviewCount] = $reviewModel->getAverageRating();
+
+        $this->renderAdminView('admin/reviews/index', [
+            'reviews' => $reviewModel->getAllWithDesign(),
+            'designs' => array_slice($designModel->getActive(), 0, 30),
+            'avgRating' => $avgRating,
+            'reviewCount' => $reviewCount,
+            'pageTitle' => 'Manage Reviews - Admin - Tips by Nadine',
+        ]);
+    }
+
+    public function saveReview() {
+        Auth::requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/reviews.php');
+        }
+
+        $reviewId = (int)($_POST['review_id'] ?? 0);
+        $clientName = trim($_POST['client_name'] ?? '');
+        $rating = (int)($_POST['rating'] ?? 0);
+        $reviewText = trim($_POST['review_text'] ?? '');
+        $serviceName = trim($_POST['service_name'] ?? '');
+        $designId = !empty($_POST['design_id']) ? (int)$_POST['design_id'] : null;
+
+        $errors = [];
+        if (empty($clientName)) $errors[] = 'Client name is required.';
+        if ($rating < 1 || $rating > 5) $errors[] = 'Rating must be between 1 and 5.';
+        if (empty($reviewText)) $errors[] = 'Review text is required.';
+
+        if (!empty($errors)) {
+            $this->flash('error', implode(' ', $errors));
+            $this->redirect('/admin/reviews.php');
+        }
+
+        $data = [
+            'client_name' => $clientName,
+            'rating' => $rating,
+            'review_text' => $reviewText,
+            'service_name' => $serviceName ?: null,
+            'design_id' => $designId,
+            'is_active' => isset($_POST['is_active']) ? (int)$_POST['is_active'] : 1,
+        ];
+
+        $reviewModel = new Review();
+        if ($reviewId) {
+            $reviewModel->update($reviewId, $data);
+            $this->flash('success', 'Review updated.');
+        } else {
+            $reviewModel->create($data);
+            $this->flash('success', 'Review added.');
+        }
+
+        $this->redirect('/admin/reviews.php');
+    }
+
+    public function toggleReview() {
+        Auth::requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/reviews.php');
+        }
+
+        $reviewId = (int)($_POST['review_id'] ?? 0);
+        $isActive = (int)($_POST['is_active'] ?? 0);
+
+        if ($reviewId) {
+            $reviewModel = new Review();
+            $reviewModel->update($reviewId, ['is_active' => $isActive ? 1 : 0]);
+            $this->flash('success', 'Review status updated.');
+        }
+
+        $this->redirect('/admin/reviews.php');
     }
 
     private function handleImageUpload($file) {

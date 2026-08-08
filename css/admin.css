@@ -476,3 +476,36 @@
         display: none;
     }
 }
+
+/* ---- Reviews management ---- */
+.review-rating-summary {
+    color: var(--color-accent);
+}
+
+.review-stars {
+    color: #e8a33d;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.review-stars-muted {
+    color: #d8d4c8;
+}
+
+.review-text-cell {
+    max-width: 320px;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+}
+
+.review-design-tag {
+    margin-top: var(--spacing-xs);
+    font-size: 0.8rem;
+    color: var(--color-accent);
+}
+
+@media (max-width: 768px) {
+    .review-text-cell {
+        max-width: 180px;
+    }
+}

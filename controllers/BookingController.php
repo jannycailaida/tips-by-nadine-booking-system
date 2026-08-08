@@ -32,6 +32,11 @@ class BookingController extends BaseController {
             'services' => $services,
             'designs' => $designs,
             'categories' => $categories,
+            'meta' => [
+                'title' => 'Book an Appointment - Tips by Nadine',
+                'description' => 'Reserve your nail appointment online at Tips by Nadine — choose a service, design, and real-time time slot. Instant confirmation by email.',
+            ],
+            'pageRoute' => 'booking.php',
             'pageTitle' => 'Book Appointment - Tips by Nadine',
         ]);
     }
@@ -208,6 +213,12 @@ class BookingController extends BaseController {
         $this->view('booking/confirmation', [
             'booking' => $booking,
             'ai_recommendations' => $aiRecommendations,
+            'noindex' => true,
+            'meta' => [
+                'title' => $label . ' - Tips by Nadine',
+                'description' => 'Your Tips by Nadine appointment details and confirmation.',
+            ],
+            'pageRoute' => 'booking/confirmation.php?id=' . $bookingId,
             'pageTitle' => $label . ' - Tips by Nadine',
         ]);
     }
@@ -220,6 +231,12 @@ class BookingController extends BaseController {
 
         $this->view('booking/my-bookings', [
             'bookings' => $bookings,
+            'noindex' => true,
+            'meta' => [
+                'title' => 'My Bookings - Tips by Nadine',
+                'description' => 'View and manage your Tips by Nadine appointments.',
+            ],
+            'pageRoute' => 'dashboard.php',
             'pageTitle' => 'My Bookings - Tips by Nadine',
         ]);
     }

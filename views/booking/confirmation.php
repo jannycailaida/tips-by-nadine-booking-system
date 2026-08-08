@@ -110,6 +110,12 @@
                     <strong>Need to make changes?</strong> You can cancel up to 24 hours before your appointment from your dashboard.
                 </p>
             <?php endif; ?>
+
+            <?php if ($status !== 'cancelled'): ?>
+                <p class="confirmation-share">
+                    Love seeing yourself styled? Tag <strong>#TipsByNadine</strong> so we can feature your nails.
+                </p>
+            <?php endif; ?>
         </div>
     </div>
 </section>

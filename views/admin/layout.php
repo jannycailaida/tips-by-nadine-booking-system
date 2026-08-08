@@ -29,6 +29,7 @@
                     <a href="<?php echo base_url('admin/dashboard.php'); ?>" class="admin-nav-link <?php echo (basename($_SERVER['PHP_SELF']) === 'dashboard.php') ? 'active' : ''; ?>">Dashboard</a>
                     <a href="<?php echo base_url('admin/bookings.php'); ?>" class="admin-nav-link <?php echo (basename($_SERVER['PHP_SELF']) === 'bookings.php') ? 'active' : ''; ?>">Bookings</a>
                     <a href="<?php echo base_url('admin/designs.php'); ?>" class="admin-nav-link <?php echo (basename($_SERVER['PHP_SELF']) === 'designs.php') ? 'active' : ''; ?>">Designs</a>
+                    <a href="<?php echo base_url('admin/reviews.php'); ?>" class="admin-nav-link <?php echo (basename($_SERVER['PHP_SELF']) === 'reviews.php') ? 'active' : ''; ?>">Reviews</a>
                 </nav>
 
                 <div class="admin-user">
@@ -66,6 +67,12 @@
                     <circle cx="8.5" cy="8.5" r="1.5"/>
                 </svg>
                 Designs
+            </a>
+            <a href="<?php echo base_url('admin/reviews.php'); ?>" class="admin-sidebar-link <?php echo (basename($_SERVER['PHP_SELF']) === 'reviews.php') ? 'active' : ''; ?>">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                Reviews
             </a>
         </nav>
     </aside>

@@ -53,5 +53,26 @@
                 </div>
             </div>
         </div>
+
+        <?php if (!empty($designReviews)): ?>
+            <div class="design-reviews-block reveal-fade">
+                <h3 class="design-reviews-heading">Loved by our clients</h3>
+                <div class="design-reviews-grid">
+                    <?php foreach ($designReviews as $review): ?>
+                        <div class="design-review-item">
+                            <div class="review-stars" aria-label="<?php echo (int)$review['rating']; ?> out of 5 stars">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="<?php echo $i <= (int)$review['rating'] ? 'currentColor' : 'none'; ?>" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                <?php endfor; ?>
+                            </div>
+                            <p class="design-review-text">“<?php echo htmlspecialchars($review['review_text']); ?>”</p>
+                            <span class="design-review-client"><?php echo htmlspecialchars($review['client_name']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </section>

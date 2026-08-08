@@ -2844,11 +2844,287 @@ html {
 .reveal-stagger-children > *:nth-child(3) { transition-delay: 200ms; }
 .reveal-stagger-children > *:nth-child(4) { transition-delay: 300ms; }
 
-/* Smooth background color transitions for sections */
-.split-section,
-.features,
-.services-preview,
-.cta-section,
-.about-values {
-    transition: background-color 0.4s ease;
+/* ============================================================
+   Marketing Layer — social proof, AI halo, social footprint
+   ============================================================ */
+
+/* Hero trust line (AI differentiator) */
+.hero-trust {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-lg) auto 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid rgba(246, 244, 238, 0.18);
+    border-radius: var(--radius-pill);
+    background: rgba(246, 244, 238, 0.08);
+    backdrop-filter: blur(4px);
+    font-size: 0.92rem;
+    color: var(--dark-text-muted);
+    letter-spacing: 0.02em;
+}
+
+/* How It Works strip */
+.how-it-works {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-3xl) 0;
+}
+
+.how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.how-card {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-muted);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.how-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.how-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+}
+
+.how-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-primary);
+}
+
+.how-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* Client Reviews / social proof */
+.reviews-section {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-3xl) 0;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.review-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.review-stars {
+    display: flex;
+    gap: 2px;
+    margin-bottom: var(--spacing-sm);
+    color: #e8a33d;
+}
+
+.review-stars svg {
+    flex-shrink: 0;
+}
+
+.review-text {
+    margin: 0 0 var(--spacing-md);
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: var(--color-text);
+}
+
+.review-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: auto;
+}
+
+.review-client {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.review-service {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+/* Design-detail client reviews */
+.design-reviews-block {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+}
+
+.design-reviews-heading {
+    font-size: 1.15rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-primary);
+}
+
+.design-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+}
+
+.design-review-item {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.design-review-item .review-stars {
+    margin-bottom: var(--spacing-sm);
+}
+
+.design-review-text {
+    margin: 0 0 var(--spacing-sm);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--color-text);
+}
+
+.design-review-client {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+/* Gallery hashtag strip (UGC prompt) */
+.gallery-hashtag {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px dashed var(--color-accent);
+    border-radius: var(--radius-lg);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-dark);
+    font-size: 0.95rem;
+}
+
+.gallery-hashtag-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.gallery-hashtag strong {
+    color: var(--color-accent-dark);
+}
+
+/* Footer social row */
+.footer-social {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-muted);
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-social-link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.footer-tagline {
+    max-width: 30ch;
+    margin-top: var(--spacing-sm);
+}
+
+/* Confirmation share prompt */
+.confirmation-share {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+}
+
+.confirmation-share strong {
+    color: var(--color-accent-dark);
+}
+
+/* ---- Marketing layer responsive ---- */
+@media (max-width: 1024px) {
+    .how-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .reviews-grid,
+    .design-reviews-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .how-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reviews-grid,
+    .design-reviews-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .how-card {
+        padding: var(--spacing-lg);
+    }
+
+    .review-card {
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .hero-trust {
+        font-size: 0.85rem;
+    }
+
+    .gallery-hashtag {
+        align-items: flex-start;
+    }
 }

@@ -98,6 +98,20 @@ CREATE TABLE IF NOT EXISTS bookings (
     UNIQUE KEY unique_active_slot (active_slot_key)
 );
 
+-- Client reviews (social proof, surfaced on the landing page)
+CREATE TABLE IF NOT EXISTS reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    client_name VARCHAR(150) NOT NULL,
+    rating TINYINT NOT NULL DEFAULT 5 COMMENT '1 to 5 stars',
+    review_text TEXT NOT NULL,
+    service_name VARCHAR(150) NULL COMMENT 'Service the client received (denormalised label)',
+    design_id INT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (design_id) REFERENCES nail_designs(id) ON DELETE SET NULL
+);
+
 -- Email notifications log
 CREATE TABLE IF NOT EXISTS email_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,

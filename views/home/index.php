@@ -10,6 +10,69 @@
             <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-primary btn-lg">Reserve Now</a>
             <a href="<?php echo base_url('gallery.php'); ?>" class="btn btn-light btn-lg">Browse Designs</a>
         </div>
+        <p class="hero-trust">
+            <span aria-hidden="true">✨</span> Upload a vibe photo and our AI suggests matching designs in seconds
+        </p>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works" aria-labelledby="how-it-works-title">
+    <div class="container">
+        <header class="section-header reveal-stagger-children">
+            <span class="section-eyebrow">How It Works</span>
+            <h2 id="how-it-works-title" class="section-title">Reserve Your Chair in Minutes</h2>
+            <p class="section-subtitle">From first inspiration to booked appointment — no phone calls needed</p>
+        </header>
+
+        <div class="how-grid">
+            <article class="how-card reveal-stagger">
+                <div class="how-icon" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </div>
+                <h3>1 · Save a look</h3>
+                <p>Share a photo of a look you love, or browse the gallery for inspiration.</p>
+            </article>
+
+            <article class="how-card reveal-stagger">
+                <div class="how-icon" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="2" x2="6" y2="22"/>
+                        <circle cx="8" cy="6" r="4" fill="none"/>
+                        <circle cx="16" cy="18" r="4" fill="none"/>
+                    </svg>
+                </div>
+                <h3>2 · Match with AI</h3>
+                <p>Our AI recommends designs that fit your photo, taste, and budget.</p>
+            </article>
+
+            <article class="how-card reveal-stagger">
+                <div class="how-icon" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <h3>3 · Pick a time</h3>
+                <p>Choose a real-time open slot and get instant confirmation by email.</p>
+            </article>
+        </div>
+
+        <div class="section-cta reveal-fade">
+            <a href="<?php echo base_url('booking.php'); ?>" class="text-cta">
+                Start booking
+                <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+        </div>
     </div>
 </section>
 
@@ -112,6 +175,46 @@
         </div>
     </div>
 </section>
+
+<!-- Client Reviews -->
+<?php if (!empty($featuredReviews)): ?>
+<section class="reviews-section" aria-labelledby="reviews-title">
+    <div class="container">
+        <header class="section-header reveal-stagger-children">
+            <span class="section-eyebrow">Client Love</span>
+            <h2 id="reviews-title" class="section-title">Polished, Pampered, Adored</h2>
+            <p class="section-subtitle">
+                <?php if ($avgRating[1] > 0): ?>
+                    Rated <?php echo $avgRating[0]; ?>/5 by <?php echo $avgRating[1]; ?> happy client<?php echo $avgRating[1] === 1 ? '' : 's'; ?>
+                <?php else: ?>
+                    What our clients say after every visit
+                <?php endif; ?>
+            </p>
+        </header>
+
+        <div class="reviews-grid reveal-stagger-children">
+            <?php foreach ($featuredReviews as $review): ?>
+                <article class="review-card">
+                    <div class="review-stars" aria-label="<?php echo (int)$review['rating']; ?> out of 5 stars">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="<?php echo $i <= (int)$review['rating'] ? 'currentColor' : 'none'; ?>" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        <?php endfor; ?>
+                    </div>
+                    <blockquote class="review-text">“<?php echo htmlspecialchars($review['review_text']); ?>”</blockquote>
+                    <footer class="review-meta">
+                        <span class="review-client"><?php echo htmlspecialchars($review['client_name']); ?></span>
+                        <?php if ($review['service_name']): ?>
+                            <span class="review-service"><?php echo htmlspecialchars($review['service_name']); ?></span>
+                        <?php endif; ?>
+                    </footer>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
 
 <!-- Featured Designs -->
 <section class="featured-designs" aria-labelledby="featured-title">
