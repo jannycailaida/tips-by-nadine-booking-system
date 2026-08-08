@@ -9,7 +9,7 @@
 <section class="contact-section">
     <div class="container">
         <div class="contact-grid">
-            <div class="contact-info">
+            <div class="contact-info reveal-slide-right">
                 <h2>Get in Touch</h2>
                 <p>Have questions about our services or need assistance with a booking? Contact us and we'll respond as soon as possible.</p>
 
@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            <div class="contact-form-card">
+            <div class="contact-form-card reveal-slide-left">
                 <h2>Send a Message</h2>
 
                 <?php if (isset($errors) && !empty($errors)): ?>

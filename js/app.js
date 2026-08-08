@@ -6,6 +6,10 @@
 (function () {
     'use strict';
 
+    // Signal that JS is active — gates the scroll-reveal and lazy-image
+    // "hidden" states so content is never trapped invisible without JS.
+    document.documentElement.classList.add('js');
+
     /* ============================================================
        Utilities
        ============================================================ */
@@ -515,6 +519,89 @@
     }
 
     /* ============================================================
+       Scroll Reveal Animations
+       ============================================================ */
+    var REVEAL_SELECTOR =
+        '.reveal, .reveal-stagger, .reveal-fade, .reveal-slide-left, ' +
+        '.reveal-slide-right, .reveal-scale, .reveal-stagger-children';
+
+    function initScrollReveal() {
+        var revealEls = qsa(REVEAL_SELECTOR);
+        if (!revealEls.length) return;
+
+        // No IntersectionObserver → show everything immediately.
+        if (!('IntersectionObserver' in window)) {
+            revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+            return;
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.12,
+            rootMargin: '0px 0px -48px 0px'
+        });
+
+        revealEls.forEach(function (el) { observer.observe(el); });
+    }
+
+    /* ============================================================
+       Lazy Image Fade-in
+       ============================================================ */
+    function initLazyImages() {
+        qsa('img[loading="lazy"]').forEach(function (img) {
+            if (img.complete && img.naturalWidth > 0) {
+                img.classList.add('loaded');
+            } else {
+                img.addEventListener('load', function () {
+                    img.classList.add('loaded');
+                });
+            }
+        });
+    }
+
+    /* ============================================================
+       Scrolled State (subtle nav raise + parallax drift)
+       ============================================================ */
+    function initScrollEffects() {
+        var nav = qs('.nav');
+        var parallaxEls = qsa('.parallax-bg');
+        var rafPending = false;
+        // Skip parallax for users who opt out of motion. Uses the
+        // modern `translate` property so it composes with any base
+        // `transform` (e.g. centering) instead of clobbering it.
+        var reduceMotion = window.matchMedia &&
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function onScroll() {
+            if (nav) nav.classList.toggle('is-scrolled', window.scrollY > 24);
+            if (!reduceMotion && parallaxEls.length) {
+                var vh = window.innerHeight;
+                parallaxEls.forEach(function (el) {
+                    var speed = parseFloat(el.getAttribute('data-speed') || '0.2');
+                    var rect = el.getBoundingClientRect();
+                    var drift = (rect.top + rect.height / 2 - vh / 2) * speed;
+                    el.style.translate = '0 ' + drift.toFixed(1) + 'px';
+                });
+            }
+            rafPending = false;
+        }
+
+        function requestScroll() {
+            if (rafPending) return;
+            rafPending = true;
+            window.requestAnimationFrame(onScroll);
+        }
+
+        window.addEventListener('scroll', requestScroll, { passive: true });
+    }
+
+    /* ============================================================
        Init
        ============================================================ */
     onReady(function () {
@@ -524,5 +611,8 @@
         initUploadArea();
         initBookingFilter();
         initCancelBooking();
+        initScrollReveal();
+        initLazyImages();
+        initScrollEffects();
     });
 })();

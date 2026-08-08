@@ -45,7 +45,7 @@
                 </div>
             <?php else: ?>
                 <?php foreach ($designs as $design): ?>
-                    <article class="design-card">
+                    <article class="design-card reveal-stagger">
                         <div class="design-image">
                             <?php if ($design['image_path']): ?>
                                 <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" loading="lazy">

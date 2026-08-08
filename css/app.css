@@ -104,6 +104,10 @@ html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /* Same rationale as body below: `clip` (not `hidden`) kills phantom
+       horizontal scroll without turning the element into a scroll
+       container, so position: sticky (nav) keeps working. */
+    overflow-x: clip;
 }
 
 body {
@@ -116,6 +120,10 @@ body {
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* `clip` (not `hidden`) suppresses phantom horizontal scroll from
+       slide-reveal translate states without turning body into a scroll
+       container — keeps position: sticky (nav) intact. */
+    overflow-x: clip;
 }
 
 img, svg {
@@ -373,6 +381,16 @@ main {
     align-items: center;
     justify-content: space-between;
     height: 76px;
+    transition: height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav.is-scrolled {
+    background: rgba(250, 248, 244, 0.96);
+    box-shadow: var(--shadow-sm);
+}
+
+.nav.is-scrolled .nav-container {
+    height: 64px;
 }
 
 .nav-brand {
@@ -542,22 +560,55 @@ main {
     text-align: center;
 }
 
-.hero::after {
+.hero::before {
+    /* Warm scrim over the hero photo so the dark-on-light caption stays legible.
+       The radial glows echo the brand's amber light so the old hero mood carries
+       onto the photograph. */
     content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+        radial-gradient(1200px 700px at 78% -8%, rgba(255, 255, 255, 0.08), transparent 60%),
+        radial-gradient(900px 520px at 8% 108%, rgba(205, 78, 10, 0.18), transparent 55%),
+        linear-gradient(170deg, rgba(28, 32, 26, 0.58) 0%, rgba(24, 28, 23, 0.72) 55%, rgba(42, 74, 36, 0.84) 100%);
+    pointer-events: none;
+}
+
+/* The salon photograph behind the hero caption. Lives on its own layer so it
+   can parallax-drag via the modern `translate` property without moving the
+   static content above it; the 1.08 base scale keeps frost-free edges while
+   it drifts. */
+.hero .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        url('../assets/images/hero-seating.webp') center 32% / cover no-repeat;
+    /* Higher specificity than `.parallax-bg` (defined later) so the
+       scale survives; the JS parallax drives `translate` independently. */
+    transform: scale(1.08);
+    will-change: transform;
+    pointer-events: none;
+}
+
+/* Decorative arch echoes the ::after — this one parallaxes with scroll */
+.hero-arch {
     position: absolute;
     left: 50%;
     bottom: -90px;
-    transform: translateX(-50%);
+    margin-left: -170px;
     width: 340px;
     height: 170px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 340px 340px 0 0;
     pointer-events: none;
+    z-index: 1;
 }
 
 .hero .container {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     max-width: 860px;
 }
 
@@ -2432,4 +2483,372 @@ main {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* ============================================================
+   Scroll Animations
+   ============================================================ */
+
+/* Base reveal animation */
+.js .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered reveal for grid items */
+.js .reveal-stagger {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-stagger.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Stagger delays for grid children */
+.reveal-stagger:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger:nth-child(2) { transition-delay: 100ms; }
+.reveal-stagger:nth-child(3) { transition-delay: 200ms; }
+.reveal-stagger:nth-child(4) { transition-delay: 300ms; }
+.reveal-stagger:nth-child(5) { transition-delay: 400ms; }
+.reveal-stagger:nth-child(6) { transition-delay: 500ms; }
+.reveal-stagger:nth-child(7) { transition-delay: 600ms; }
+.reveal-stagger:nth-child(8) { transition-delay: 700ms; }
+.reveal-stagger:nth-child(9) { transition-delay: 800ms; }
+.reveal-stagger:nth-child(10) { transition-delay: 900ms; }
+.reveal-stagger:nth-child(11) { transition-delay: 1000ms; }
+.reveal-stagger:nth-child(12) { transition-delay: 1100ms; }
+
+/* Fade in variant */
+.js .reveal-fade {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.reveal-fade.is-visible {
+    opacity: 1;
+}
+
+/* Slide in from left */
+.js .reveal-slide-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-slide-left.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Slide in from right */
+.js .reveal-slide-right {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-slide-right.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Scale up reveal */
+.js .reveal-scale {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-scale.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Parallax wrapper for subtle background movement */
+.parallax-bg {
+    transform: translateY(0);
+    will-change: translate, transform;
+}
+
+/* Smooth scroll for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Smooth transitions for interactive elements */
+.btn,
+.nav-link,
+.filter-tab,
+.design-card,
+.feature-card,
+.service-card,
+.booking-card,
+.design-option-content,
+.service-option-content {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hero entrance animations */
+.hero-title {
+    animation: hero-title-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-subtitle {
+    animation: hero-text-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+    opacity: 0;
+}
+
+.hero-actions {
+    animation: hero-text-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+    opacity: 0;
+}
+
+.hero-eyebrow {
+    animation: hero-text-reveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+    opacity: 0;
+}
+
+@keyframes hero-title-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hero-text-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Card hover lift with smooth spring */
+.design-card:hover,
+.feature-card:hover,
+.service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Booking card hover */
+.booking-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Button press/tap feedback */
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* Focus ring animation */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.filter-tab:focus-visible,
+.form-input:focus,
+.select:focus {
+    animation: focus-ring 0.3s ease-out;
+}
+
+@keyframes focus-ring {
+    0% { box-shadow: 0 0 0 0 rgba(205, 78, 10, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(205, 78, 10, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(205, 78, 10, 0); }
+}
+
+/* Toast entrance already defined, ensure smooth */
+.toast {
+    animation: toast-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Modal entrance */
+.modal-container {
+    animation: modal-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay {
+    animation: fade-in 0.2s ease-out;
+}
+
+@keyframes modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Cancel confirm panel slide down */
+.cancel-confirm {
+    animation: slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading spinner smooth */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Page header entrance */
+.page-header {
+    animation: page-header-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page-header .page-title {
+    animation: page-header-child-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+    opacity: 0;
+}
+
+.page-header .page-subtitle {
+    animation: page-header-child-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+    opacity: 0;
+}
+
+.page-header .breadcrumb {
+    animation: page-header-child-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+    opacity: 0;
+}
+
+@keyframes page-header-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes page-header-child-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Confirmation card entrance */
+.confirmation-card {
+    animation: confirmation-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes confirmation-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Breadcrumb link hover */
+.breadcrumb a {
+    transition: color 0.15s ease;
+}
+
+/* Form input smooth */
+.form-input,
+.select,
+.form-textarea {
+    transition: border-color 0.15s ease,
+                box-shadow 0.15s ease,
+                background 0.15s ease;
+}
+
+/* Image lazy load fade-in (only when JS is active) */
+.js img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.js img[loading="lazy"].loaded {
+    opacity: 1;
+}
+
+/* Staggered reveal for section headers: reveal each child in sequence */
+.js .reveal-stagger-children > * {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-stagger-children.is-visible > * {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-stagger-children > *:nth-child(1) { transition-delay: 0ms; }
+.reveal-stagger-children > *:nth-child(2) { transition-delay: 100ms; }
+.reveal-stagger-children > *:nth-child(3) { transition-delay: 200ms; }
+.reveal-stagger-children > *:nth-child(4) { transition-delay: 300ms; }
+
+/* Smooth background color transitions for sections */
+.split-section,
+.features,
+.services-preview,
+.cta-section,
+.about-values {
+    transition: background-color 0.4s ease;
 }

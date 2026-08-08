@@ -1,5 +1,7 @@
 <!-- Hero Section -->
 <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-bg parallax-bg" data-speed="0.18" aria-hidden="true"></div>
+    <div class="hero-arch parallax-bg" data-speed="0.2" aria-hidden="true"></div>
     <div class="container">
         <span class="hero-eyebrow">Tips by Nadine · Nail Studio</span>
         <h1 id="hero-title" class="hero-title">Serenity In Every <span class="hero-accent">Polish Stroke</span></h1>
@@ -14,14 +16,14 @@
 <!-- Features -->
 <section class="features" aria-labelledby="features-title">
     <div class="container">
-        <header class="section-header">
+        <header class="section-header reveal-stagger-children">
             <span class="section-eyebrow">Why Choose Us</span>
             <h2 id="features-title" class="section-title">The Tips by Nadine Experience</h2>
             <p class="section-subtitle">Modern nail care meets smart, relaxing technology</p>
         </header>
 
         <div class="features-grid">
-            <article class="feature-card">
+            <article class="feature-card reveal-stagger">
                 <div class="feature-icon" aria-hidden="true">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -34,7 +36,7 @@
                 <p class="feature-description">Check real-time availability and book your appointment in seconds. No more phone calls or waiting for callbacks.</p>
             </article>
 
-            <article class="feature-card">
+            <article class="feature-card reveal-stagger">
                 <div class="feature-icon" aria-hidden="true">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="23 4 23 10 23 16"/>
@@ -47,7 +49,7 @@
                 <p class="feature-description">Upload a reference photo and get personalized nail design suggestions powered by AI technology.</p>
             </article>
 
-            <article class="feature-card">
+            <article class="feature-card reveal-stagger">
                 <div class="feature-icon" aria-hidden="true">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -58,7 +60,7 @@
                 <p class="feature-description">Receive instant confirmations and timely reminders so you never miss an appointment.</p>
             </article>
 
-            <article class="feature-card">
+            <article class="feature-card reveal-stagger">
                 <div class="feature-icon" aria-hidden="true">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
@@ -76,12 +78,12 @@
 <section class="split-section alt" aria-labelledby="heritage-title">
     <div class="container">
         <div class="split-grid">
-            <div class="split-media">
+            <div class="split-media reveal-slide-left">
                 <div class="arch-frame">
                     <img src="<?php echo base_url('assets/images/heritage.jpg'); ?>" alt="Freshly manicured nails in a serene salon setting" loading="lazy">
                 </div>
             </div>
-            <div class="split-content">
+            <div class="split-content reveal-slide-right">
                 <span class="split-eyebrow">Our Story</span>
                 <h2 id="heritage-title" class="split-title">Crafted With Care, In The Heart Of The City</h2>
                 <p class="split-text">From classic manicures to bespoke nail art, every visit to Tips by Nadine is designed to unwind and inspire. Our studio pairs skilled artistry with a serene, tropical atmosphere — so you leave feeling polished, relaxed, and beautifully you.</p>
@@ -114,7 +116,7 @@
 <!-- Featured Designs -->
 <section class="featured-designs" aria-labelledby="featured-title">
     <div class="container">
-        <header class="section-header">
+        <header class="section-header reveal-stagger-children">
             <span class="section-eyebrow">Gallery</span>
             <h2 id="featured-title" class="section-title">Featured Designs</h2>
             <p class="section-subtitle">Popular styles our clients love</p>
@@ -134,7 +136,7 @@
                 </div>
             <?php else: ?>
                 <?php foreach ($featuredDesigns as $design): ?>
-                    <article class="design-card">
+                    <article class="design-card reveal-stagger">
                         <div class="design-image">
                             <?php if ($design['image_path']): ?>
                                 <img src="<?php echo base_url(htmlspecialchars($design['image_path'])); ?>" alt="<?php echo htmlspecialchars($design['name']); ?>" loading="lazy">
@@ -153,7 +155,7 @@
             <?php endif; ?>
         </div>
 
-        <div class="section-cta">
+        <div class="section-cta reveal-fade">
             <a href="<?php echo base_url('gallery.php'); ?>" class="text-cta">
                 Browse The Full Gallery
                 <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -168,7 +170,7 @@
 <!-- Services Preview -->
 <section class="services-preview" aria-labelledby="services-title">
     <div class="container">
-        <header class="section-header">
+        <header class="section-header reveal-stagger-children">
             <span class="section-eyebrow">Our Menu</span>
             <h2 id="services-title" class="section-title">Enjoy Our Services</h2>
             <p class="section-subtitle">Professional nail care tailored to you</p>
@@ -189,7 +191,7 @@
                         default => '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'
                     };
                 ?>
-                <article class="service-card">
+                <article class="service-card reveal-stagger">
                     <div class="service-icon" aria-hidden="true">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <?php echo $iconSvg; ?>
@@ -208,7 +210,7 @@
 <!-- CTA Section -->
 <section class="cta-section" aria-labelledby="cta-title">
     <div class="container">
-        <div class="cta-content">
+        <div class="cta-content reveal-stagger-children">
             <span class="cta-eyebrow">Reserve Your Seat</span>
             <h2 id="cta-title" class="cta-title">Nail Your Perfect Appointment</h2>
             <p class="cta-subtitle">Book your seat today and experience the Tips by Nadine difference.</p>
