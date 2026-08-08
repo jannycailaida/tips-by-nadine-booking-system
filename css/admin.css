@@ -509,3 +509,109 @@
         max-width: 180px;
     }
 }
+
+/* ---- Leads ---- */
+.lead-email {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+/* ---- Analytics (funnel) ---- */
+.funnel-bar-wrap {
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-pill);
+    height: 12px;
+    overflow: hidden;
+    margin-top: var(--spacing-md);
+}
+
+.funnel-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dark));
+    border-radius: var(--radius-pill);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.funnel-hint {
+    margin-top: var(--spacing-sm);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.funnel-daily {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.funnel-daily li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.funnel-daily li.is-today .funnel-daily-label,
+.funnel-daily li.is-today .funnel-daily-count {
+    color: var(--color-accent-dark);
+    font-weight: 600;
+}
+
+.funnel-daily-label {
+    width: 58px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.funnel-daily-track {
+    flex: 1;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-muted);
+    overflow: hidden;
+}
+
+.funnel-daily-fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dark));
+    border-radius: var(--radius-pill);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.funnel-daily-count {
+    width: 26px;
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Per-event badge tints for the recent-activity trail */
+.event-booking_started {
+    background: #e8f0f6;
+    color: var(--color-info);
+}
+
+.event-booking_completed,
+.event-lead_captured {
+    background: #e8f4ee;
+    color: var(--color-success);
+}
+
+.event-booking_confirmed {
+    background: #fdf3e3;
+    color: var(--color-warning);
+}
+
+.event-booking_cancelled {
+    background: #fdeaea;
+    color: var(--color-error);
+}

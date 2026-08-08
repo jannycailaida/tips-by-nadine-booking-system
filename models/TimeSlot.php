@@ -31,4 +31,22 @@ class TimeSlot extends BaseModel {
             return !in_array($slot['id'], $bookedIds);
         });
     }
+
+    /**
+     * Scarcity snapshot for one date — real numbers, never fabricated.
+     * Drives the "Only 3 slots left" urgency line on the booking form.
+     */
+    public function getAvailability($date) {
+        $total = count($this->getByDay(date('l', strtotime($date))));
+        $booked = $this->db->fetch(
+            "SELECT COUNT(*) AS count FROM bookings
+             WHERE booking_date = ? AND status IN ('pending', 'confirmed')",
+            [$date]
+        )['count'];
+        return [
+            'total'     => (int)$total,
+            'booked'    => (int)$booked,
+            'available' => (int)max(0, $total - $booked),
+        ];
+    }
 }

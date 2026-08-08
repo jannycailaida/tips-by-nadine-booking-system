@@ -233,6 +233,7 @@
 
             slotSelect.disabled = true;
             slotSelect.innerHTML = '<option value="">Loading available times...</option>';
+            resetSlotsUrgency();
 
             var body = new URLSearchParams();
             body.append('date', date);
@@ -264,6 +265,7 @@
                     if (data.slots && data.slots.length === 0) {
                         slotSelect.innerHTML = '<option value="">No slots available</option>';
                     }
+                    updateSlotsUrgency(date, data.availability);
                 })
                 .catch(function (err) {
                     slotSelect.innerHTML = '<option value="">Error loading slots</option>';
@@ -281,6 +283,107 @@
         var suffix = h >= 12 ? 'PM' : 'AM';
         var displayH = h % 12 || 12;
         return displayH + ':' + m + ' ' + suffix;
+    }
+
+    /* ============================================================
+       Booking Form - Real-time Slot Urgency (Tier 2)
+       Surfaces "Only 3 slots left" on tight dates — real counts
+       straight from the server, never fabricated.
+       ============================================================ */
+    var urgencyEl = null;
+    function getUrgencyEl() {
+        if (!urgencyEl) urgencyEl = qs('#slots-urgency');
+        return urgencyEl;
+    }
+
+    function resetSlotsUrgency() {
+        var el = getUrgencyEl();
+        if (el) {
+            el.hidden = true;
+            el.className = 'slots-urgency';
+        }
+    }
+
+    function updateSlotsUrgency(date, availability) {
+        var el = getUrgencyEl();
+        if (!el || !availability) return;
+
+        var available = parseInt(availability.available, 10) || 0;
+        var total = parseInt(availability.total, 10) || 0;
+
+        if (available === 0) {
+            el.hidden = false;
+            el.className = 'slots-urgency is-full';
+            el.textContent = 'This date is fully booked — try another day.';
+            return;
+        }
+        if (available <= 3) {
+            el.hidden = false;
+            el.className = 'slots-urgency is-urgent';
+            el.textContent = 'Only ' + available + (available === 1 ? ' slot' : ' slots') +
+                ' left on this date — grab it before it\'s gone.';
+            return;
+        }
+        resetSlotsUrgency();
+    }
+
+    /* ============================================================
+       Landing Lead Capture (Tier 2)
+       ============================================================ */
+    var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function initLeadCapture() {
+        var form = qs('#lead-capture');
+        if (!form) return;
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var input = qs('#lead_email', form);
+            var btn = qs('.lead-capture-btn', form);
+            var email = (input.value || '').trim();
+
+            if (!EMAIL_RE.test(email)) {
+                input.focus();
+                showToast('Please enter a valid email address.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Signing you up…';
+
+            var body = new URLSearchParams();
+            body.append('email', email);
+
+            fetch(apiUrl('/lead.php'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: body.toString(),
+                credentials: 'same-origin'
+            })
+                .then(function (response) {
+                    return response.json().catch(function () {
+                        throw new Error('Something went wrong — please try again.');
+                    });
+                })
+                .then(function (data) {
+                    if (!data.success) throw new Error(data.error || 'Could not sign you up.');
+                    form.classList.add('is-success');
+                    form.hidden = true;
+                    var ok = qs('.lead-capture-success', form.parentNode);
+                    if (ok) ok.hidden = false;
+                    showToast(data.message || "You're on the list!", 'success');
+                })
+                .catch(function (err) {
+                    btn.disabled = false;
+                    btn.textContent = 'Keep Me in the Loop';
+                    showToast(err.message || 'Could not sign you up — please try again.', 'error');
+                    input.focus();
+                });
+        });
     }
 
     /* ============================================================
@@ -609,6 +712,7 @@
         initBookingSteps();
         initTimeSlots();
         initUploadArea();
+        initLeadCapture();
         initBookingFilter();
         initCancelBooking();
         initScrollReveal();

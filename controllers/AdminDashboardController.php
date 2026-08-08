@@ -10,6 +10,8 @@ require_once __DIR__ . '/../models/Booking.php';
 require_once __DIR__ . '/../models/NailDesign.php';
 require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/Review.php';
+require_once __DIR__ . '/../models/Lead.php';
+require_once __DIR__ . '/../models/AnalyticsEvent.php';
 require_once __DIR__ . '/../includes/Auth.php';
 require_once __DIR__ . '/../config/app.php';
 
@@ -89,6 +91,11 @@ class AdminDashboardController extends BaseController {
 
         $bookingModel = new Booking();
         $bookingModel->updateStatus($bookingId, $status);
+
+        // Funnel analytics — a booking entering its confirmed (payable) state (Tier 2).
+        if ($status === 'confirmed') {
+            (new AnalyticsEvent())->track('booking_confirmed', null, $bookingId);
+        }
 
         $this->flash('success', 'Booking #' . $bookingId . ' status updated to ' . ucfirst($status) . '.');
         $this->redirect('/admin/bookings.php');
@@ -263,6 +270,59 @@ class AdminDashboardController extends BaseController {
         }
 
         $this->redirect('/admin/reviews.php');
+    }
+
+    /**
+     * Lead list + CSV export — the start of a retargeting/email list.
+     */
+    public function leads() {
+        Auth::requireAdmin();
+
+        $leadModel = new Lead();
+
+        if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+            $this->exportLeadsCsv($leadModel->getAll());
+            return;
+        }
+
+        $this->renderAdminView('admin/leads/index', [
+            'leads' => $leadModel->getAll(),
+            'total' => $leadModel->countTotal(),
+            'pageTitle' => 'Leads - Admin - Tips by Nadine',
+        ]);
+    }
+
+    private function exportLeadsCsv($leads) {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="tips-by-nadine-leads-' . date('Y-m-d') . '.csv"');
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['Email', 'Source', 'Captured At']);
+        foreach ($leads as $lead) {
+            fputcsv($out, [
+                $lead['email'],
+                $lead['source'],
+                $lead['created_at'],
+            ]);
+        }
+        fclose($out);
+        exit;
+    }
+
+    /**
+     * Funnel dashboard — booking_started → booking_completed, cancellations,
+     * leads captured. Numbers so future marketing decisions are based on data.
+     */
+    public function analytics() {
+        Auth::requireAdmin();
+
+        $analytics = new AnalyticsEvent();
+
+        $this->renderAdminView('admin/analytics/index', [
+            'funnel' => $analytics->getFunnelCounts(),
+            'daily' => $analytics->getDailyCounts(14),
+            'recentEvents' => $analytics->getRecent(40),
+            'pageTitle' => 'Analytics - Admin - Tips by Nadine',
+        ]);
     }
 
     private function handleImageUpload($file) {

@@ -93,6 +93,7 @@
                         <select name="time_slot_id" id="time_slot_id" class="form-input" required disabled>
                             <option value="">Select a date first</option>
                         </select>
+                        <p class="slots-urgency" id="slots-urgency" hidden aria-live="polite"></p>
                     </div>
                 </div>
             </fieldset>

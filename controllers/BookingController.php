@@ -11,6 +11,7 @@ require_once __DIR__ . '/../models/Service.php';
 require_once __DIR__ . '/../models/NailDesign.php';
 require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/TimeSlot.php';
+require_once __DIR__ . '/../models/AnalyticsEvent.php';
 require_once __DIR__ . '/../includes/Auth.php';
 require_once __DIR__ . '/../includes/EmailService.php';
 require_once __DIR__ . '/../includes/AIRecommendationService.php';
@@ -27,6 +28,9 @@ class BookingController extends BaseController {
         $services = $serviceModel->getActive();
         $designs = $designModel->getActive();
         $categories = (new \Category())->getActive();
+
+        // Funnel analytics — a visitor entering the booking flow (Tier 2).
+        (new AnalyticsEvent())->track('booking_started', Auth::getUserId());
 
         $this->view('booking/create', [
             'services' => $services,
@@ -63,6 +67,7 @@ class BookingController extends BaseController {
 
         $this->json([
             'slots' => array_values($availableSlots),
+            'availability' => $timeSlotModel->getAvailability($date),
             'date' => $date,
         ]);
     }
@@ -163,6 +168,7 @@ class BookingController extends BaseController {
         }
 
         $bookingDetails = [
+            'booking_id' => $bookingId,
             'service_name' => $service['name'],
             'service_price' => $service['price'],
             'design_name' => $designName,
@@ -172,6 +178,12 @@ class BookingController extends BaseController {
             'end_time' => $timeSlot['end_time'],
             'status' => 'pending',
         ];
+
+        // Funnel analytics — a completed booking (Tier 2).
+        (new AnalyticsEvent())->track('booking_completed', $userId, $bookingId, [
+            'service_id' => $serviceId,
+            'design_id' => $designId,
+        ]);
 
         $emailService = new EmailService();
         $emailService->sendBookingConfirmation($user['email'], $user['first_name'], $bookingDetails);
@@ -210,9 +222,17 @@ class BookingController extends BaseController {
         ];
         $label = $statusLabels[$booking['status']] ?? 'Booking Details';
 
+        // Tier 2 — add-to-calendar (Google Calendar + .ics), directions link.
+        $config = require __DIR__ . '/../config/app.php';
+        $location = $this->getBusinessLocation($config);
         $this->view('booking/confirmation', [
             'booking' => $booking,
             'ai_recommendations' => $aiRecommendations,
+            'mapsUrl' => $this->getMapsUrl($location),
+            'locationLabel' => $location['label'],
+            'calendarUrl' => $this->buildGoogleCalendarUrl($booking, $config),
+            'icsUrl' => base_url('calendar.php?id=' . $booking['id']),
+            'social' => $config['business']['social'] ?? [],
             'noindex' => true,
             'meta' => [
                 'title' => $label . ' - Tips by Nadine',
@@ -261,6 +281,9 @@ class BookingController extends BaseController {
 
         $bookingModel->updateStatus($bookingId, 'cancelled');
 
+        // Funnel analytics — the drop-off point after a booking_exists (Tier 2).
+        (new AnalyticsEvent())->track('booking_cancelled', Auth::getUserId(), $bookingId);
+
         // Send cancellation email
         $userModel = new User();
         $user = $userModel->find(Auth::getUserId());
@@ -272,6 +295,105 @@ class BookingController extends BaseController {
         ");
 
         $this->json(['success' => true]);
+    }
+
+    /**
+     * Download an .ics file for the booking so clients can add it to their
+     * phone/desktop calendar. Same ownership guard as the confirmation page.
+     */
+    public function calendar($bookingId) {
+        Auth::requireUser();
+
+        $bookingModel = new Booking();
+        $booking = $bookingModel->getBookingDetails($bookingId);
+
+        if (!$booking || $booking['user_id'] !== Auth::getUserId()) {
+            http_response_code(404);
+            return;
+        }
+
+        $config = require __DIR__ . '/../config/app.php';
+        $location = $this->getBusinessLocation($config);
+        $now = gmdate('Ymd\THis\Z');
+        list($start, $end) = $this->buildUtcRange($booking['booking_date'], $booking['start_time'], $booking['end_time'], $config);
+
+        $ical = implode("\r\n", [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Tips by Nadine//Booking ' . $bookingId . '//EN',
+            'BEGIN:VEVENT',
+            'UID:booking-' . $booking['id'] . '@tipsbynadine',
+            'DTSTAMP:' . $now,
+            'DTSTART:' . $start,
+            'DTEND:' . $end,
+            'SUMMARY:Tips by Nadine - ' . $this->stripNonAscii($booking['service_name']),
+            'LOCATION:' . $this->stripNonAscii($location['label']),
+            'DESCRIPTION:' . $this->stripNonAscii($booking['service_name'] . ' ' . ($booking['design_name'] ? 'with ' . $booking['design_name'] : '')),
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ]);
+
+        header('Content-Type: text/calendar; charset=utf-8');
+        header('Content-Disposition: attachment; filename="tips-by-nadine-booking-' . (int)$booking['id'] . '.ics"');
+        echo $ical;
+        exit;
+    }
+
+    /**
+     * Human-readable "Street, City, Region" label for the maps link + calendar.
+     */
+    private function getBusinessLocation($config) {
+        $addr = $config['business']['address'] ?? [];
+        $label = implode(', ', array_filter([
+            $addr['street'] ?? '',
+            $addr['locality'] ?? '',
+            $addr['region'] ?? '',
+        ]));
+        return ['label' => $label, 'google_query' => $label ?: ($config['business']['name'] ?? '')];
+    }
+
+    private function getMapsUrl($location) {
+        return 'https://www.google.com/maps/search/?api=1&query=' . urlencode($location['google_query']);
+    }
+
+    /**
+     * Google Calendar "add to calendar" URL — works in any browser/email client.
+     */
+    private function buildGoogleCalendarUrl($booking, $config) {
+        list($start, $end) = $this->buildUtcRange($booking['booking_date'], $booking['start_time'], $booking['end_time'], $config);
+        $location = $this->getBusinessLocation($config);
+        $params = http_build_query([
+            'action' => 'TEMPLATE',
+            'text'   => $booking['service_name'] . ' - Tips by Nadine',
+            'dates'  => $start . '/' . $end,
+            'details' => ($booking['design_name'] ?? '') ? 'Nail design: ' . $booking['design_name'] : 'Your Tips by Nadine appointment.',
+            'location' => $location['label'],
+        ]);
+        return 'https://calendar.google.com/calendar/render?' . $params;
+    }
+
+    /**
+     * Booking date + slot times → [UTC start, UTC end] in the app timezone.
+     */
+    private function buildUtcRange($date, $startTime, $endTime, $config) {
+        $tz = new DateTimeZone($config['app']['timezone'] ?? 'Asia/Manila');
+        $start = new DateTime($date . ' ' . $startTime, $tz);
+        $end = new DateTime($date . ' ' . $endTime, $tz);
+        if ($end <= $start) {
+            $end->modify('+1 day');
+        }
+        return [
+            $start->setTimezone(new DateTimeZone('UTC'))->format('Ymd\THis\Z'),
+            $end->setTimezone(new DateTimeZone('UTC'))->format('Ymd\THis\Z'),
+        ];
+    }
+
+    /**
+     * Sanitise a value for an .ics field — single line, no control chars.
+     */
+    private function stripNonAscii($value) {
+        $value = preg_replace('/[^\x20-\x7E]/', '', (string)$value);
+        return trim(preg_replace('/[\r\n,;]+/', ' ', $value));
     }
 
     private function handleImageUpload($file) {

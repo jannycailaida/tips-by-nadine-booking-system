@@ -318,6 +318,17 @@
             <h2 id="cta-title" class="cta-title">Nail Your Perfect Appointment</h2>
             <p class="cta-subtitle">Book your seat today and experience the Tips by Nadine difference.</p>
             <a href="<?php echo base_url('booking.php'); ?>" class="btn btn-primary btn-lg">Reserve Now</a>
+
+            <!-- Lead capture: starter retargeting list (Tier 2) -->
+            <form class="lead-capture" id="lead-capture" method="POST" action="<?php echo base_url('lead.php'); ?>" novalidate>
+                <label for="lead_email" class="visually-hidden">Email address</label>
+                <div class="lead-capture-row">
+                    <input type="email" name="email" id="lead_email" class="lead-capture-input" placeholder="you@example.com" required autocomplete="email">
+                    <button type="submit" class="btn btn-primary lead-capture-btn">Keep Me in the Loop</button>
+                </div>
+                <p class="lead-capture-note">Nail inspiration, first dibs on new designs &amp; seasonal treats. No spam — ever.</p>
+                <p class="lead-capture-success" hidden>You're on the list — watch your inbox! 💅</p>
+            </form>
         </div>
     </div>
 </section>

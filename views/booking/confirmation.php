@@ -75,6 +75,43 @@
                 </dl>
             </div>
 
+            <?php if (in_array($status, ['confirmed', 'pending'])): ?>
+                <?php $hoursLine = 'Mon–Sat 9:00 AM – 7:00 PM · Sun 10:00 AM – 5:00 PM'; ?>
+                <div class="confirmation-extras">
+                    <h3>Save It · Find Us · Share It</h3>
+                    <div class="extras-row">
+                        <a href="<?php echo htmlspecialchars($calendarUrl); ?>" target="_blank" rel="noopener" class="extras-chip">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Add to Calendar
+                        </a>
+                        <a href="<?php echo htmlspecialchars($icsUrl); ?>" class="extras-chip">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Download .ics
+                        </a>
+                        <a href="<?php echo htmlspecialchars($mapsUrl); ?>" target="_blank" rel="noopener" class="extras-chip">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            Get Directions
+                        </a>
+                    </div>
+                    <p class="extras-location">
+                        <strong><?php echo htmlspecialchars($locationLabel); ?></strong>
+                        <span>· <?php echo $hoursLine; ?></span>
+                    </p>
+                </div>
+            <?php endif; ?>
+
             <?php if (!empty($ai_recommendations)): ?>
                 <div class="ai-recommendations-confirmation">
                     <h3>AI Design Recommendations</h3>
@@ -112,9 +149,39 @@
             <?php endif; ?>
 
             <?php if ($status !== 'cancelled'): ?>
-                <p class="confirmation-share">
-                    Love seeing yourself styled? Tag <strong>#TipsByNadine</strong> so we can feature your nails.
-                </p>
+                <div class="confirmation-share">
+                    <p class="confirmation-share-text">
+                        Love seeing yourself styled? Tag <strong>#TipsByNadine</strong> and we'll feature your nails —
+                        and a friend deserves the same glow. Bring someone along next time; two chairs, double the relaxing.
+                    </p>
+                    <?php if (!empty(array_filter($social))): ?>
+                        <div class="confirmation-social" aria-label="Follow Tips by Nadine">
+                            <?php if (!empty($social['instagram'])): ?>
+                                <a href="<?php echo htmlspecialchars($social['instagram']); ?>" class="footer-social-link" rel="noopener nofollow" target="_blank" aria-label="Tips by Nadine on Instagram">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                                    </svg>
+                                </a>
+                            <?php endif; ?>
+                            <?php if (!empty($social['facebook'])): ?>
+                                <a href="<?php echo htmlspecialchars($social['facebook']); ?>" class="footer-social-link" rel="noopener nofollow" target="_blank" aria-label="Tips by Nadine on Facebook">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                                    </svg>
+                                </a>
+                            <?php endif; ?>
+                            <?php if (!empty($social['tiktok'])): ?>
+                                <a href="<?php echo htmlspecialchars($social['tiktok']); ?>" class="footer-social-link" rel="noopener nofollow" target="_blank" aria-label="Tips by Nadine on TikTok">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                                    </svg>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>

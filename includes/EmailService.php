@@ -85,6 +85,44 @@ class EmailService {
         $date = date('F j, Y', strtotime($details['booking_date']));
         $time = date('g:i A', strtotime($details['start_time'])) . ' - ' . date('g:i A', strtotime($details['end_time']));
 
+        // Tier 2 — save-it / find-us / share-it blocks wired from business config.
+        $biz = $this->config['business'] ?? [];
+        $addr = $biz['address'] ?? [];
+        $locationLabel = implode(', ', array_filter([
+            $addr['street'] ?? '',
+            $addr['locality'] ?? '',
+            $addr['region'] ?? '',
+        ])) ?: ($biz['name'] ?? 'Tips by Nadine');
+        $base = rtrim($this->config['app']['url'] ?? '', '/');
+        $icsUrl = $base . '/calendar.php?id=' . (int)($details['booking_id'] ?? 0);
+        $mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($locationLabel);
+
+        // Google Calendar add-to-calendar URL (absolute, UTC, app timezone).
+        $tz = new DateTimeZone($this->config['app']['timezone'] ?? 'Asia/Manila');
+        $utc = new DateTimeZone('UTC');
+        $cStart = new DateTime($details['booking_date'] . ' ' . $details['start_time'], $tz);
+        $cEnd = new DateTime($details['booking_date'] . ' ' . $details['end_time'], $tz);
+        if ($cEnd <= $cStart) $cEnd->modify('+1 day');
+        $calUrl = 'https://calendar.google.com/calendar/render?' . http_build_query([
+            'action'   => 'TEMPLATE',
+            'text'     => $details['service_name'] . ' - Tips by Nadine',
+            'dates'    => $cStart->setTimezone($utc)->format('Ymd\THis\Z') . '/' . $cEnd->setTimezone($utc)->format('Ymd\THis\Z'),
+            'details'  => !empty($details['design_name']) ? 'Nail design: ' . $details['design_name'] : 'Your Tips by Nadine appointment.',
+            'location' => $locationLabel,
+        ]);
+
+        $social = $biz['social'] ?? [];
+        $socialLinks = '';
+        if (!empty($social['instagram'])) {
+            $socialLinks .= "<a href=\"" . htmlspecialchars($social['instagram']) . "\" style=\"display:inline-block;margin:0 6px;\">Instagram</a>";
+        }
+        if (!empty($social['facebook'])) {
+            $socialLinks .= "<a href=\"" . htmlspecialchars($social['facebook']) . "\" style=\"display:inline-block;margin:0 6px;\">Facebook</a>";
+        }
+        if (!empty($social['tiktok'])) {
+            $socialLinks .= "<a href=\"" . htmlspecialchars($social['tiktok']) . "\" style=\"display:inline-block;margin:0 6px;\">TikTok</a>";
+        }
+
         return "
         <!DOCTYPE html>
         <html>
@@ -101,6 +139,14 @@ class EmailService {
                 .label { font-weight: 600; color: #555; }
                 .value { color: #333; }
                 .btn { display: inline-block; background: #d4a574; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+                .btn-orange { background: #cd4e0a; }
+                .action-row { text-align: center; margin: 24px 0 8px; }
+                .action-btn { display: inline-block; background: #cd4e0a; color: #fff; padding: 12px 22px; text-decoration: none; border-radius: 6px; font-size: 13px; margin: 4px 6px; }
+                .action-btn.ghost { background: #f2e7db; color: #4c3d2a; }
+                .location { background: #fafafa; padding: 16px 20px; border-radius: 8px; margin: 20px 0; text-align: center; font-size: 14px; color: #555; }
+                .location strong { color: #333; display: block; margin-bottom: 4px; }
+                .referral { border-top: 1px solid #eee; margin-top: 24px; padding-top: 16px; font-size: 13px; color: #777; text-align: center; }
+                .social { text-align: center; margin-top: 12px; font-size: 12px; }
             </style>
         </head>
         <body>
@@ -118,13 +164,24 @@ class EmailService {
                     " . ($details['design_name'] ? "<div class='detail-row'><span class='label'>Nail Design:</span> <span class='value'>{$details['design_name']}</span></div>" : "") . "
                     <div class='detail-row'><span class='label'>Total:</span> <span class='value'>₱" . number_format($details['service_price'] + ($details['design_price'] ?? 0), 2) . "</span></div>
                 </div>
+                <div class='action-row'>
+                    <a class='action-btn' href='{$calUrl}' target='_blank'>Add to Calendar</a>
+                    <a class='action-btn ghost' href='{$icsUrl}'>Download .ics</a>
+                    <a class='action-btn ghost' href='{$mapsUrl}' target='_blank'>Get Directions</a>
+                </div>
+                <div class='location'>
+                    <strong>{$locationLabel}</strong>
+                    You'll walk in knowing exactly where to sit — see hours and map when you tap directions.
+                </div>
                 <p>If you need to reschedule or cancel, please contact us at least 24 hours in advance.</p>
-                <p>We look forward to seeing you!</p>
+                <p>We look forward to seeing you! And if you know a friend overdue for some polish, bring them along — booked appointments are twice as nice shared.</p>
                 <p style='margin-top: 30px;'>Warm regards,<br><strong>Tips by Nadine Team</strong></p>
+                <p class='referral'>Love it? Tag <strong>#TipsByNadine</strong> on Instagram and we'll feature your nails.</p>
             </div>
             <div class='footer'>
                 <p>This is an automated message. Please do not reply to this email.</p>
                 <p>Tips by Nadine Nail Salon</p>
+                <div class='social'>" . ($socialLinks ?: "<p>@tipsbynadine everywhere</p>") . "</div>
             </div>
         </body>
         </html>
